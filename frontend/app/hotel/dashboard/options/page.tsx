@@ -30,7 +30,6 @@ const GET_HOTEL = gql`
         description
         included
         category
-        price
       }
       policies {
         title
@@ -68,7 +67,6 @@ interface Amenity {
   name: string
   included: boolean
   category: string
-  price: number
 }
 
 interface Policy {
@@ -273,7 +271,6 @@ export default function HotelOptions() {
           description: formData.description,
           included: formData.included ?? true,
           category: formData.category,
-          price: formData.price || 0,
         }
         updatedAmenities = [...amenities, newAmenity]
       }
@@ -532,9 +529,6 @@ export default function HotelOptions() {
                         >
                           {amenity.included ? "Included" : "Premium"}
                         </span>
-                        <span className="ml-2 text-lg font-bold text-gray-900">
-                          {amenity.price === 0 ? "Free" : `$${amenity.price}`}
-                        </span>
                       </div>
                     </div>
                   </div>
@@ -695,16 +689,6 @@ export default function HotelOptions() {
                       <option value="included">Included</option>
                       <option value="premium">Premium</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.price || 0}
-                      onChange={(e) => setFormData({ ...formData, price: Number.parseFloat(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
                   </div>
                 </div>
               )}
