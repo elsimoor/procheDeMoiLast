@@ -1,9 +1,24 @@
-"use client"
+"use client";
 
 import { useRouter } from "next/navigation";
 import { gql, useQuery } from "@apollo/client";
 import { getBooking, updateBooking } from "../../../../lib/booking";
 import { useState, useEffect, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Wifi, Tv, Utensils, ParkingSquare, Wine, Star, Martini } from "lucide-react";
+
 
 /*
  * Room detail page
@@ -26,6 +41,7 @@ const GET_ROOM = gql`
       images
       description
       hotelId {
+        name
         amenities {
           name
           description
@@ -47,8 +63,20 @@ interface Amenity {
 }
 
 interface Extras {
-  [key: string]: boolean;
+  [key:string]: boolean;
 }
+
+// Helper to map amenity names to icons
+const amenityIcons: { [key: string]: React.ElementType } = {
+  "Wifi": Wifi,
+  "TV": Tv,
+  "Kitchen": Utensils,
+  "Parking": ParkingSquare,
+  "Champagne": Wine,
+  "Breakfast": Martini,
+  "default": Star,
+};
+
 
 export default function RoomDetailPage({ params }: { params: { roomId: string } }) {
   const router = useRouter();
@@ -81,7 +109,6 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
   const [extras, setExtras] = useState<Extras>({});
 
   const room = data?.room;
-  console.log("Room data:", room);
   const amenities = room?.hotelId?.amenities || [];
 
   // When extras change, recompute total cost and persist extras to booking
@@ -101,159 +128,222 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
     setExtras((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
+  const [selectedView, setSelectedView] = useState("City View");
+
   const handleAddToCart = () => {
     const selectedAmenities = amenities?.filter((a: Amenity) => extras[a.name]);
     // Persist extras and total price
-    updateBooking({ extras: selectedAmenities, total });
+    updateBooking({ extras: selectedAmenities, total, view: selectedView });
     router.push("/hotel/checkout");
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200 py-4 px-6 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <span className="font-bold text-xl text-gray-900">StayEase</span>
-        </div>
-        <div className="flex items-center space-x-4">
-          <a
-            href="/login"
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100"
-          >
-            Log in
-          </a>
-        </div>
-      </header>
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        {loading ? (
-          <p>Loading room…</p>
-        ) : error || !room ? (
-          <p className="text-red-600">Unable to load room details.</p>
-        ) : (
-          <>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">
-              {room?.type}
-            </h1>
-            {/* Image grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {room?.images && room?.images.length > 0 ? (
-                room?.images.slice(0, 4).map((img: string, idx: number) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    alt={`${room?.type} image ${idx + 1}`}
-                    className={
-                      idx === 0
-                        ? "col-span-2 row-span-2 w-full h-64 object-cover rounded-lg"
-                        : "w-full h-32 object-cover rounded-lg"
-                    }
-                  />
-                ))
-              ) : (
-                <div className="w-full h-64 bg-gray-200 rounded-lg"></div>
-              )}
-            </div>
-            {/* Description */}
-            <section className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                About this stay
-              </h2>
-              <p className="text-gray-700">
-                {room?.description ||
-                  "A comfortable and well equipped room to make your stay memorable."}
-              </p>
-            </section>
-            {/* Amenities */}
-            <section className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                What this place offers
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {amenities
-                  .filter((a: Amenity) => a.included)
-                  .map((amenity: Amenity) => (
-                    <div key={amenity.name} className="flex items-center space-x-2">
-                      <span>✓</span>
-                      <span>{amenity.name}</span>
-                    </div>
-                  ))}
-              </div>
-            </section>
-            {/* Add-ons */}
-            <section className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Add-ons</h2>
-              <div className="space-y-6">
-                {Object.entries(
-                  amenities
-                    .filter((a: Amenity) => !a.included)
-                    .reduce((acc: Record<string, Amenity[]>, amenity: Amenity) => {
-                      (acc[amenity.category] ??= []).push(amenity);
-                      return acc;
-                    }, {} as Record<string, Amenity[]>)
-                ).map(([category, items]) => (
-                  <div key={category}>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">{category}</h3>
-                    <div className="space-y-4">
-                      {items.map((amenity: Amenity) => (
-                        <label
-                          key={amenity.name}
-                          className="flex items-center justify-between space-x-3 cursor-pointer"
-                        >
-                          <div>
-                            <div className="font-medium text-gray-800">{amenity.name}</div>
-                            <div className="text-sm text-gray-500">{amenity.description}</div>
-                          </div>
-                          <div className="flex items-center space-x-4">
-                            <span className="text-gray-800">${amenity.price.toFixed(2)}</span>
-                            <input
-                              type="checkbox"
-                              checked={!!extras[amenity.name]}
-                              onChange={() => toggleExtra(amenity.name)}
-                              className="form-checkbox h-5 w-5 text-blue-600 rounded"
-                            />
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
+    <div className="bg-background font-sans">
+      <main className="max-w-[1040px] mx-auto px-4 sm:px-16 lg:px-8 py-10">
+        {loading && <p>Loading room…</p>}
+        {error && <p className="text-red-600">Unable to load room details.</p>}
+        {room && (
+          <div className="space-y-10">
+            {/* Breadcrumb trail */}
+            <section>
+              <Breadcrumb className="text-sm text-gray-500">
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink href="/hotel/search">Stays</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    {/* Assuming Paris is the city, this could be dynamic */}
+                    <BreadcrumbLink href="/hotel/search?city=Paris">Paris</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage className="text-gray-700 font-medium">{room.type}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
             </section>
 
-            {/* Price summary */}
-            <section className="mb-12">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Price summary
-              </h2>
-              <div className="border border-gray-200 rounded-lg p-4 divide-y divide-gray-200 text-sm">
-                <div className="flex justify-between py-2">
-                  <span>
-                    Base price ({nights} night{nights > 1 ? "s" : ""})
-                  </span>
-                  <span>${basePrice.toFixed(2)}</span>
-                </div>
-                {amenities
-                  .filter((a: Amenity) => extras[a.name])
-                  .map((amenity: Amenity) => (
-                    <div key={amenity.name} className="flex justify-between py-2">
-                      <span>{amenity.name}</span>
-                      <span>${amenity.price.toFixed(2)}</span>
+            {/* Page heading */}
+            <section>
+              <h1 className="text-3xl lg:text-4xl font-bold font-serif mb-2">
+                {`Charming Apartment with ${room.type} View`}
+              </h1>
+            </section>
+
+            {/* Image collage */}
+            <section className="grid grid-cols-2 md:grid-cols-4 grid-rows-2 gap-2 h-[400px] md:h-[600px]">
+              {room.images && room.images.length > 0 && (
+                <>
+                  <div className="col-span-2 row-span-2">
+                    <img
+                      src={room.images[0]}
+                      alt={`${room.type} hero image`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                  {room.images.slice(1, 5).map((img: string, idx: number) => (
+                    <div key={idx} className="w-full h-full">
+                      <img
+                        src={img}
+                        alt={`${room.type} image ${idx + 2}`}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
                     </div>
                   ))}
-                <div className="flex justify-between py-2 font-semibold">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
-                </div>
-              </div>
+                </>
+              )}
             </section>
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              className="bg-blue-600 text-white rounded-full px-6 py-3 font-medium hover:bg-blue-700"
-            >
-              Add to cart
-            </button>
-          </>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-12">
+              <div className="space-y-10">
+                {/* About this stay */}
+                <section>
+                  <h2 className="text-lg font-semibold mb-4">About this stay</h2>
+                  <p className="text-sm text-gray-700 max-w-[600px]">
+                    {room.description || "A comfortable and well-equipped room to make your stay memorable."}
+                  </p>
+                </section>
+
+                {/* What this place offers */}
+                <section>
+                  <h2 className="text-lg font-semibold mb-4">What this place offers</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-3">
+                    {amenities
+                      .filter((a: Amenity) => a.included)
+                      .map((amenity: Amenity) => {
+                        const Icon = amenityIcons[amenity.name] || amenityIcons.default;
+                        return (
+                          <div
+                            key={amenity.name}
+                            className="flex items-center space-x-3 rounded-full border border-gray-300 px-4 py-2"
+                          >
+                            <Icon className="h-4 w-4 text-gray-600" />
+                            <span className="text-sm text-gray-800">{amenity.name}</span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </section>
+
+                {/* Select your view */}
+                <section>
+                  <h2 className="text-lg font-semibold mb-4">Select your view</h2>
+                  <ToggleGroup
+                    type="single"
+                    defaultValue={selectedView}
+                    onValueChange={(value) => {
+                      if (value) setSelectedView(value);
+                    }}
+                    className="justify-start"
+                  >
+                    <ToggleGroupItem value="City View" aria-label="Select City View" className="data-[state=on]:bg-blue-600 data-[state=on]:text-white">
+                      City View
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="Eiffel Tower View" aria-label="Select Eiffel Tower View" className="data-[state=on]:bg-blue-600 data-[state=on]:text-white">
+                      Eiffel Tower View
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </section>
+
+                {/* Add-ons */}
+                <section>
+                  <h2 className="text-lg font-semibold mb-4">Add-ons</h2>
+                  <div className="space-y-6">
+                    {Object.entries(
+                      amenities
+                        .filter((a: Amenity) => !a.included)
+                        .reduce((acc: Record<string, Amenity[]>, amenity: Amenity) => {
+                          (acc[amenity.category] ??= []).push(amenity);
+                          return acc;
+                        }, {} as Record<string, Amenity[]>)
+                    ).map(([category, items]) => (
+                      <div key={category}>
+                        <h3 className="text-md font-medium text-gray-800 mb-3">{category}</h3>
+                        <div className="space-y-4">
+                          {items.map((amenity: Amenity) => (
+                            <div key={amenity.name} className="flex items-center justify-between">
+                              <div className="flex items-center space-x-3">
+                                <Checkbox
+                                  id={amenity.name}
+                                  checked={!!extras[amenity.name]}
+                                  onCheckedChange={() => toggleExtra(amenity.name)}
+                                />
+                                <label
+                                  htmlFor={amenity.name}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                  {amenity.name}
+                                </label>
+                              </div>
+                              <span className="text-sm text-gray-600">(${amenity.price.toFixed(2)})</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+
+              <div className="mt-10 lg:mt-0 space-y-8">
+                {/* Summary Cards */}
+                <Card className="w-full">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">Your stay</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Dates</span>
+                      <span className="font-medium">{`${booking.checkIn} to ${booking.checkOut}`}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">View</span>
+                      <span className="font-medium">{selectedView}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Parking</span>
+                      <span className="font-medium">{extras["Parking"] ? "Yes" : "No"}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="w-full">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">Price summary</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>{`${nights} night${nights > 1 ? "s" : ""}`}</span>
+                      <span>${basePrice.toFixed(2)}</span>
+                    </div>
+                    {amenities
+                      .filter((a: Amenity) => extras[a.name])
+                      .map((amenity: Amenity) => (
+                        <div key={amenity.name} className="flex justify-between">
+                          <span>{amenity.name}</span>
+                          <span>${amenity.price.toFixed(2)}</span>
+                        </div>
+                      ))}
+                    <Separator />
+                    <div className="flex justify-between font-bold text-base">
+                      <span>Total</span>
+                      <span>${total.toFixed(2)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            {/* Add to cart Button */}
+            <div className="fixed bottom-0 left-0 w-full p-4 bg-white/80 backdrop-blur-sm border-t md:hidden">
+                <Button size="lg" className="w-full" onClick={handleAddToCart}>Add to cart</Button>
+            </div>
+            <div className="hidden md:block fixed bottom-8 right-8">
+                <Button size="lg" className="rounded-full px-8 shadow-lg" onClick={handleAddToCart}>Add to cart</Button>
+            </div>
+          </div>
         )}
       </main>
     </div>
