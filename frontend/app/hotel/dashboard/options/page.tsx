@@ -30,6 +30,7 @@ const GET_HOTEL = gql`
         description
         included
         category
+        price
       }
       policies {
         title
@@ -67,6 +68,8 @@ interface Amenity {
   name: string
   included: boolean
   category: string
+  price: number
+
 }
 
 interface Policy {
@@ -157,16 +160,16 @@ export default function HotelOptions() {
           icon: service.category === "Food & Beverage"
             ? "Utensils"
             : service.category === "Transportation"
-            ? "Car"
-            : service.category === "Wellness"
-            ? "Waves"
-            : service.category === "Fitness"
-            ? "Dumbbell"
-            : service.category === "Business"
-            ? "Coffee"
-            : service.category === "Technology"
-            ? "Wifi"
-            : "Utensils",
+              ? "Car"
+              : service.category === "Wellness"
+                ? "Waves"
+                : service.category === "Fitness"
+                  ? "Dumbbell"
+                  : service.category === "Business"
+                    ? "Coffee"
+                    : service.category === "Technology"
+                      ? "Wifi"
+                      : "Utensils",
           ...service,
         }))
       )
@@ -203,7 +206,7 @@ export default function HotelOptions() {
       default:
         return Utensils // Default icon if not found
     }
-  } 
+  }
 
 
   // The amenities and policies state is initialised when hotelData changes.
@@ -271,6 +274,7 @@ export default function HotelOptions() {
           description: formData.description,
           included: formData.included ?? true,
           category: formData.category,
+          price: formData.price,
         }
         updatedAmenities = [...amenities, newAmenity]
       }
@@ -390,11 +394,10 @@ export default function HotelOptions() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
               >
                 {tab.label}
               </button>
@@ -462,9 +465,8 @@ export default function HotelOptions() {
                         </div>
                         <div className="flex items-center">
                           <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              service.available ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                            }`}
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${service.available ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                              }`}
                           >
                             {service.available ? "Available" : "Unavailable"}
                           </span>
@@ -521,13 +523,17 @@ export default function HotelOptions() {
                     <div className="flex justify-between items-center">
                       <div>
                         <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            amenity.included
-                              ? "bg-green-100 text-green-800"
-                              : "bg-blue-100 text-blue-800"
-                          }`}
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${amenity.included
+                            ? "bg-green-100 text-green-800"
+                            : "bg-blue-100 text-blue-800"
+                            }`}
                         >
                           {amenity.included ? "Included" : "Premium"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-lg font-bold text-gray-900">
+                          {amenity.price === 0 ? "Free" : `$${amenity.price}`}
                         </span>
                       </div>
                     </div>
@@ -676,6 +682,17 @@ export default function HotelOptions() {
                       required
                       value={formData.category || ""}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={formData.price || 0}
+                      onChange={(e) => setFormData({ ...formData, price: Number.parseFloat(e.target.value) })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>

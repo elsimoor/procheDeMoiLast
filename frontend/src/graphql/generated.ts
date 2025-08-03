@@ -40,6 +40,7 @@ export type Amenity = {
   description?: Maybe<Scalars['String']>;
   included: Scalars['Boolean'];
   name: Scalars['String'];
+  price?: Maybe<Scalars['Float']>;
 };
 
 export type AmenityInput = {
@@ -47,6 +48,7 @@ export type AmenityInput = {
   description?: InputMaybe<Scalars['String']>;
   included: Scalars['Boolean'];
   name: Scalars['String'];
+  price?: InputMaybe<Scalars['Float']>;
 };
 
 export type AuthPayload = {
