@@ -181,51 +181,45 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
             </section>
             {/* Add-ons */}
             <section className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Add-ons
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Add-ons</h2>
               <div className="space-y-6">
-                {amenities
-                  .filter((a: Amenity) => !a.included)
-                  .reduce((acc, amenity) => {
-                    if (!acc[amenity.category]) {
-                      acc[amenity.category] = [];
-                    }
-                    acc[amenity.category].push(amenity);
-                    return acc;
-                  }, {} as any)
-                  ((groupedAmenities: any) =>
-                    Object.entries(groupedAmenities).map(([category, amenities]) => (
-                      <div key={category}>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">{category}</h3>
-                        <div className="space-y-4">
-                          {amenities?.map((amenity: Amenity) => (
-                            <label
-                              key={amenity.name}
-                              className="flex items-center justify-between space-x-3 cursor-pointer"
-                            >
-                              <div>
-                                <div className="font-medium text-gray-800">{amenity.name}</div>
-                                <div className="text-sm text-gray-500">{amenity.description}</div>
-                              </div>
-                              <div className="flex items-center space-x-4">
-                                <span className="text-gray-800">${amenity.price.toFixed(2)}</span>
-                                <input
-                                  type="checkbox"
-                                  checked={!!extras[amenity.name]}
-                                  onChange={() => toggleExtra(amenity.name)}
-                                  className="form-checkbox h-5 w-5 text-blue-600 rounded"
-                                />
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  )
-                }
+                {Object.entries(
+                  amenities
+                    .filter((a: Amenity) => !a.included)
+                    .reduce((acc: Record<string, Amenity[]>, amenity: Amenity) => {
+                      (acc[amenity.category] ??= []).push(amenity);
+                      return acc;
+                    }, {} as Record<string, Amenity[]>)
+                ).map(([category, items]) => (
+                  <div key={category}>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">{category}</h3>
+                    <div className="space-y-4">
+                      {items.map((amenity: Amenity) => (
+                        <label
+                          key={amenity.name}
+                          className="flex items-center justify-between space-x-3 cursor-pointer"
+                        >
+                          <div>
+                            <div className="font-medium text-gray-800">{amenity.name}</div>
+                            <div className="text-sm text-gray-500">{amenity.description}</div>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <span className="text-gray-800">${amenity.price.toFixed(2)}</span>
+                            <input
+                              type="checkbox"
+                              checked={!!extras[amenity.name]}
+                              onChange={() => toggleExtra(amenity.name)}
+                              className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                            />
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
+
             {/* Price summary */}
             <section className="mb-12">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
