@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 
 /*
  * Hotel reservation search page
@@ -116,53 +117,61 @@ export default function HotelSearchPage() {
       {/* Search panel */}
       <div className="max-w-xl mx-auto px-4 py-8">
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <button
-            type="button"
-            className="flex-1 border border-gray-300 rounded-full py-3 px-4 text-gray-700 text-center hover:bg-gray-50"
-            onClick={() => {
-              // Focus the adults select when clicked
-              const el = document.getElementById("adults-select");
-              if (el) el.focus();
-            }}
-          >
-            Adults: {adults}
-          </button>
-          <button
-            type="button"
-            className="flex-1 border border-gray-300 rounded-full py-3 px-4 text-gray-700 text-center hover:bg-gray-50"
-            onClick={() => {
-              const el = document.getElementById("children-select");
-              if (el) el.focus();
-            }}
-          >
-            Children: {children}
-          </button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex-1 border border-gray-300 rounded-full py-3 px-4 text-gray-700 text-center hover:bg-gray-50"
+              >
+                Adults: {adults}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setAdults((a) => Math.max(1, a - 1))}
+                  className="px-2 py-1 border rounded-md"
+                >
+                  -
+                </button>
+                <span>{adults}</span>
+                <button
+                  onClick={() => setAdults((a) => a + 1)}
+                  className="px-2 py-1 border rounded-md"
+                >
+                  +
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex-1 border border-gray-300 rounded-full py-3 px-4 text-gray-700 text-center hover:bg-gray-50"
+              >
+                Children: {children}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setChildren((c) => Math.max(0, c - 1))}
+                  className="px-2 py-1 border rounded-md"
+                >
+                  -
+                </button>
+                <span>{children}</span>
+                <button
+                  onClick={() => setChildren((c) => c + 1)}
+                  className="px-2 py-1 border rounded-md"
+                >
+                  +
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
-        {/* Hidden selects for adults/children */}
-        <select
-          id="adults-select"
-          value={adults}
-          onChange={(e) => setAdults(parseInt(e.target.value))}
-          className="hidden"
-        >
-          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
-        <select
-          id="children-select"
-          value={children}
-          onChange={(e) => setChildren(parseInt(e.target.value))}
-          className="hidden"
-        >
-          {Array.from({ length: 6 }, (_, i) => i).map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
