@@ -43,7 +43,7 @@ export const roomResolvers: IResolvers<unknown, Context> = {
       _parent,
       { id }: IdArg
     ) => {
-      return await RoomModel.findById(id);
+      return await RoomModel.findById(id).populate('hotel');
     }
     ,
     /**
