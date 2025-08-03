@@ -5,7 +5,7 @@ export const roomTypeDef = gql`
 
   type Room {
     id: ID!
-    hotelId: ID!
+    hotelId: Hotel
     number: String!
     type: String!
     floor: Int

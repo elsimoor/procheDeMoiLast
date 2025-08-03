@@ -25,7 +25,7 @@ const GET_ROOM = gql`
       price
       images
       description
-      hotel {
+      hotelId {
         amenities {
           name
           description
@@ -81,11 +81,12 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
   const [extras, setExtras] = useState<Extras>({});
 
   const room = data?.room;
-  const amenities = room?.hotel?.amenities || [];
+  console.log("Room data:", room);
+  const amenities = room?.hotelId?.amenities || [];
 
   // When extras change, recompute total cost and persist extras to booking
   const extrasCost = useMemo(() => {
-    return amenities.reduce((total: number, amenity: Amenity) => {
+    return amenities?.reduce((total: number, amenity: Amenity) => {
       if (extras[amenity.name]) {
         return total + amenity.price;
       }
@@ -93,7 +94,7 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
     }, 0);
   }, [extras, amenities]);
 
-  const basePrice = room ? room.price * nights : 0;
+  const basePrice = room ? room?.price * nights : 0;
   const total = basePrice + extrasCost;
 
   const toggleExtra = (name: string) => {
@@ -101,7 +102,7 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
   };
 
   const handleAddToCart = () => {
-    const selectedAmenities = amenities.filter((a: Amenity) => extras[a.name]);
+    const selectedAmenities = amenities?.filter((a: Amenity) => extras[a.name]);
     // Persist extras and total price
     updateBooking({ extras: selectedAmenities, total });
     router.push("/hotel/checkout");
@@ -131,16 +132,16 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
         ) : (
           <>
             <h1 className="text-3xl font-bold text-gray-900 mb-6">
-              {room.type}
+              {room?.type}
             </h1>
             {/* Image grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {room.images && room.images.length > 0 ? (
-                room.images.slice(0, 4).map((img: string, idx: number) => (
+              {room?.images && room?.images.length > 0 ? (
+                room?.images.slice(0, 4).map((img: string, idx: number) => (
                   <img
                     key={idx}
                     src={img}
-                    alt={`${room.type} image ${idx + 1}`}
+                    alt={`${room?.type} image ${idx + 1}`}
                     className={
                       idx === 0
                         ? "col-span-2 row-span-2 w-full h-64 object-cover rounded-lg"
@@ -158,7 +159,7 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
                 About this stay
               </h2>
               <p className="text-gray-700">
-                {room.description ||
+                {room?.description ||
                   "A comfortable and well equipped room to make your stay memorable."}
               </p>
             </section>
@@ -192,13 +193,13 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
                     }
                     acc[amenity.category].push(amenity);
                     return acc;
-                  }, {} as Record<string, Amenity[]>)
-                  |> (groupedAmenities =>
+                  }, {} as any)
+                  ((groupedAmenities: any) =>
                     Object.entries(groupedAmenities).map(([category, amenities]) => (
                       <div key={category}>
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">{category}</h3>
                         <div className="space-y-4">
-                          {amenities.map((amenity: Amenity) => (
+                          {amenities?.map((amenity: Amenity) => (
                             <label
                               key={amenity.name}
                               className="flex items-center justify-between space-x-3 cursor-pointer"

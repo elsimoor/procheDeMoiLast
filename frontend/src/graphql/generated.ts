@@ -678,6 +678,7 @@ export type Query = {
    * parameters are required and should be ISO formatted dates.
    */
   availableRooms: Array<Room>;
+  availableRoomsCount: Scalars['Int'];
   /**
    * Fetch a single client by its ID.  Returns null if no client exists
    * with the provided identifier.
@@ -714,8 +715,19 @@ export type Query = {
 
 
 export type QueryAvailableRoomsArgs = {
+  adults: Scalars['Int'];
   checkIn: Scalars['Date'];
   checkOut: Scalars['Date'];
+  children: Scalars['Int'];
+  hotelId: Scalars['ID'];
+};
+
+
+export type QueryAvailableRoomsCountArgs = {
+  adults: Scalars['Int'];
+  checkIn: Scalars['Date'];
+  checkOut: Scalars['Date'];
+  children: Scalars['Int'];
   hotelId: Scalars['ID'];
 };
 
