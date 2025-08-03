@@ -52,17 +52,13 @@ export default function HotelSearchPage() {
       alert("Check‑out date must be after check‑in date");
       return;
     }
-    const booking = {
+    const searchParams = new URLSearchParams({
       checkIn,
       checkOut,
-      adults,
-      children,
-      guests: adults + children,
-    };
-    if (typeof window !== "undefined") {
-      localStorage.setItem("booking", JSON.stringify(booking));
-    }
-    router.push("/hotel/rooms");
+      adults: adults.toString(),
+      children: children.toString(),
+    });
+    router.push(`/hotel/rooms?${searchParams.toString()}`);
   };
 
   return (
