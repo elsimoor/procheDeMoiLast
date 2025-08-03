@@ -64,14 +64,8 @@ export default function CheckoutPage() {
   }, [booking.checkIn, booking.checkOut]);
   const room = data?.room;
   const basePrice = room ? room.price * nights : 0;
-  const extras = booking.extras || {};
-  const extrasCost = (() => {
-    let cost = 0;
-    if (extras.breakfast) cost += 20 * nights;
-    if (extras.parking) cost += 15 * nights;
-    if (extras.champagne) cost += 50;
-    return cost;
-  })();
+  const extras = booking.extras || [];
+  const extrasCost = extras.reduce((total: number, amenity: any) => total + amenity.price, 0);
   const tax = nights * 10; // simple tax estimate (€10/night) to match mockup
   const total = basePrice + extrasCost + tax;
 
@@ -96,10 +90,7 @@ export default function CheckoutPage() {
             totalAmount: total,
             status: "pending",
             paymentStatus: "pending",
-            notes: Object.entries(extras)
-              .filter(([k, v]) => v)
-              .map(([k]) => k)
-              .join(", "),
+            notes: extras.map((amenity: any) => amenity.name).join(", "),
           },
         },
       });
@@ -150,24 +141,34 @@ export default function CheckoutPage() {
                 {booking.guests || booking.adults + booking.children || 1} guest{(booking.guests || booking.adults + booking.children || 1) > 1 ? "s" : ""}
               </p>
               <h3 className="text-lg font-semibold mb-2">Options</h3>
-              <ul className="list-disc list-inside mb-4 text-sm text-gray-700 space-y-1">
-                {extras.breakfast && <li>Breakfast included</li>}
-                {extras.parking && <li>Parking included</li>}
-                {extras.champagne && <li>Champagne bottle</li>}
-                {!extras.breakfast && !extras.parking && !extras.champagne && <li>No extras selected</li>}
-              </ul>
-              <h3 className="text-lg font-semibold mb-2">Prix</h3>
               <div className="text-sm text-gray-700 space-y-1">
+                {extras.length > 0 ? (
+                  extras.map((amenity: any) => (
+                    <div key={amenity.name} className="flex justify-between">
+                      <span>{amenity.name}</span>
+                      <span>${amenity.price.toFixed(2)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p>No extras selected</p>
+                )}
+              </div>
+              <h3 className="text-lg font-semibold mb-2 mt-4">Price</h3>
+              <div className="text-sm text-gray-700 space-y-1 border-t pt-2">
                 <div className="flex justify-between">
-                  <span>Prix de base</span>
+                  <span>Base price</span>
                   <span>${basePrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Taxes et frais</span>
+                  <span>Extras</span>
+                  <span>${extrasCost.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Taxes & fees</span>
                   <span>${tax.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between font-semibold mt-2">
-                  <span>Prix total</span>
+                <div className="flex justify-between font-semibold mt-2 border-t pt-2">
+                  <span>Total price</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
               </div>

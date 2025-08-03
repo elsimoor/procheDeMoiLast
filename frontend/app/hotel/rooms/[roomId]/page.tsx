@@ -24,17 +24,30 @@ const GET_ROOM = gql`
       type
       price
       images
-      amenities
-      features
       description
+      hotel {
+        amenities {
+          name
+          description
+          included
+          category
+          price
+        }
+      }
     }
   }
 `;
 
+interface Amenity {
+  name: string;
+  description: string;
+  included: boolean;
+  category: string;
+  price: number;
+}
+
 interface Extras {
-  breakfast: boolean;
-  parking: boolean;
-  champagne: boolean;
+  [key: string]: boolean;
 }
 
 export default function RoomDetailPage({ params }: { params: { roomId: string } }) {
@@ -65,32 +78,32 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
   }, [booking.checkIn, booking.checkOut]);
 
   // Manage extras state
-  const [extras, setExtras] = useState<Extras>({
-    breakfast: false,
-    parking: false,
-    champagne: false,
-  });
+  const [extras, setExtras] = useState<Extras>({});
+
+  const room = data?.room;
+  const amenities = room?.hotel?.amenities || [];
 
   // When extras change, recompute total cost and persist extras to booking
   const extrasCost = useMemo(() => {
-    let cost = 0;
-    if (extras.breakfast) cost += 20 * nights;
-    if (extras.parking) cost += 15 * nights;
-    if (extras.champagne) cost += 50;
-    return cost;
-  }, [extras, nights]);
+    return amenities.reduce((total: number, amenity: Amenity) => {
+      if (extras[amenity.name]) {
+        return total + amenity.price;
+      }
+      return total;
+    }, 0);
+  }, [extras, amenities]);
 
-  const room = data?.room;
   const basePrice = room ? room.price * nights : 0;
   const total = basePrice + extrasCost;
 
-  const toggleExtra = (key: keyof Extras) => {
-    setExtras((prev) => ({ ...prev, [key]: !prev[key] }));
+  const toggleExtra = (name: string) => {
+    setExtras((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
   const handleAddToCart = () => {
+    const selectedAmenities = amenities.filter((a: Amenity) => extras[a.name]);
     // Persist extras and total price
-    updateBooking({ extras, total });
+    updateBooking({ extras: selectedAmenities, total });
     router.push("/hotel/checkout");
   };
 
@@ -152,62 +165,64 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
             {/* Amenities */}
             <section className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Ce que cet espace offre
+                What this place offers
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {room.amenities && room.amenities.length > 0
-                  ? room.amenities.map((a: string, idx: number) => (
-                      <div
-                        key={idx}
-                        className="flex items-center space-x-2 border border-gray-200 rounded-md px-3 py-2 text-sm"
-                      >
-                        <span>{a}</span>
-                      </div>
-                    ))
-                  : room.features &&
-                    room.features.map((f: string, idx: number) => (
-                      <div
-                        key={idx}
-                        className="flex items-center space-x-2 border border-gray-200 rounded-md px-3 py-2 text-sm"
-                      >
-                        <span>{f}</span>
-                      </div>
-                    ))}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {amenities
+                  .filter((a: Amenity) => a.included)
+                  .map((amenity: Amenity) => (
+                    <div key={amenity.name} className="flex items-center space-x-2">
+                      <span>✓</span>
+                      <span>{amenity.name}</span>
+                    </div>
+                  ))}
               </div>
             </section>
-            {/* Extras */}
+            {/* Add-ons */}
             <section className="mb-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Add‑ons
+                Add-ons
               </h2>
-              <div className="space-y-3">
-                <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={extras.breakfast}
-                    onChange={() => toggleExtra("breakfast")}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                  <span className="text-gray-800">Breakfast (+$20/day)</span>
-                </label>
-                <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={extras.parking}
-                    onChange={() => toggleExtra("parking")}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                  <span className="text-gray-800">Parking (+$15/day)</span>
-                </label>
-                <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={extras.champagne}
-                    onChange={() => toggleExtra("champagne")}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                  <span className="text-gray-800">Champagne Bottle (+$50)</span>
-                </label>
+              <div className="space-y-6">
+                {amenities
+                  .filter((a: Amenity) => !a.included)
+                  .reduce((acc, amenity) => {
+                    if (!acc[amenity.category]) {
+                      acc[amenity.category] = [];
+                    }
+                    acc[amenity.category].push(amenity);
+                    return acc;
+                  }, {} as Record<string, Amenity[]>)
+                  |> (groupedAmenities =>
+                    Object.entries(groupedAmenities).map(([category, amenities]) => (
+                      <div key={category}>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">{category}</h3>
+                        <div className="space-y-4">
+                          {amenities.map((amenity: Amenity) => (
+                            <label
+                              key={amenity.name}
+                              className="flex items-center justify-between space-x-3 cursor-pointer"
+                            >
+                              <div>
+                                <div className="font-medium text-gray-800">{amenity.name}</div>
+                                <div className="text-sm text-gray-500">{amenity.description}</div>
+                              </div>
+                              <div className="flex items-center space-x-4">
+                                <span className="text-gray-800">${amenity.price.toFixed(2)}</span>
+                                <input
+                                  type="checkbox"
+                                  checked={!!extras[amenity.name]}
+                                  onChange={() => toggleExtra(amenity.name)}
+                                  className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                                />
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  )
+                }
               </div>
             </section>
             {/* Price summary */}
@@ -222,24 +237,14 @@ export default function RoomDetailPage({ params }: { params: { roomId: string } 
                   </span>
                   <span>${basePrice.toFixed(2)}</span>
                 </div>
-                {extras.breakfast && (
-                  <div className="flex justify-between py-2">
-                    <span>Breakfast</span>
-                    <span>${(20 * nights).toFixed(2)}</span>
-                  </div>
-                )}
-                {extras.parking && (
-                  <div className="flex justify-between py-2">
-                    <span>Parking</span>
-                    <span>${(15 * nights).toFixed(2)}</span>
-                  </div>
-                )}
-                {extras.champagne && (
-                  <div className="flex justify-between py-2">
-                    <span>Champagne</span>
-                    <span>$50.00</span>
-                  </div>
-                )}
+                {amenities
+                  .filter((a: Amenity) => extras[a.name])
+                  .map((amenity: Amenity) => (
+                    <div key={amenity.name} className="flex justify-between py-2">
+                      <span>{amenity.name}</span>
+                      <span>${amenity.price.toFixed(2)}</span>
+                    </div>
+                  ))}
                 <div className="flex justify-between py-2 font-semibold">
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
