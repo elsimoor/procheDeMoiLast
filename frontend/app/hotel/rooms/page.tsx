@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { gql, useQuery } from "@apollo/client";
-import { getBooking, updateBooking } from "../../../lib/booking";
 
 /*
  * Rooms listing page
@@ -45,8 +44,8 @@ const GET_ROOMS = gql`
 
 // Query for rooms that are available within a date range
 const GET_AVAILABLE_ROOMS = gql`
-  query AvailableRooms($hotelId: ID!, $checkIn: Date!, $checkOut: Date!) {
-    availableRooms(hotelId: $hotelId, checkIn: $checkIn, checkOut: $checkOut) {
+  query AvailableRooms($hotelId: ID!, $checkIn: Date!, $checkOut: Date!, $adults: Int!, $children: Int!) {
+    availableRooms(hotelId: $hotelId, checkIn: $checkIn, checkOut: $checkOut, adults: $adults, children: $children) {
       id
       number
       type
@@ -61,17 +60,27 @@ const GET_AVAILABLE_ROOMS = gql`
   }
 `;
 
+const GET_AVAILABLE_ROOMS_COUNT = gql`
+  query AvailableRoomsCount($hotelId: ID!, $checkIn: Date!, $checkOut: Date!, $adults: Int!, $children: Int!) {
+    availableRoomsCount(hotelId: $hotelId, checkIn: $checkIn, checkOut: $checkOut, adults: $adults, children: $children)
+  }
+`;
+
 export default function RoomsListPage() {
   const router = useRouter();
-  // Load search criteria from storage
-  const booking = typeof window !== "undefined" ? getBooking() : {};
+  const searchParams = useSearchParams();
+
+  const checkIn = searchParams.get("checkIn");
+  const checkOut = searchParams.get("checkOut");
+  const adults = parseInt(searchParams.get("adults") || "1", 10);
+  const children = parseInt(searchParams.get("children") || "0", 10);
 
   useEffect(() => {
     // If the user hasn’t selected dates go back to search
-    if (!booking.checkIn || !booking.checkOut) {
+    if (!checkIn || !checkOut) {
       router.replace("/hotel/search");
     }
-  }, [booking, router]);
+  }, [checkIn, checkOut, router]);
 
   // Fetch hotels to determine a default hotelId
   const {
@@ -81,30 +90,28 @@ export default function RoomsListPage() {
   } = useQuery(GET_HOTELS);
 
   // Determine the current hotelId; either use the one stored or
-  // default to the first available hotel once hotels load.  When a
-  // default is chosen it is persisted to localStorage.
-  const hotelId = booking.hotelId || (hotelsData?.hotels?.[0]?.id ?? null);
-
-  useEffect(() => {
-    if (!booking.hotelId && hotelId) {
-      updateBooking({ hotelId });
-    }
-  }, [booking.hotelId, hotelId]);
+  // default to the first available hotel once hotels load.
+  const hotelId = hotelsData?.hotels?.[0]?.id ?? null;
 
   // Fetch rooms for the selected hotel once we know the id
-  const hasDates = !!booking.checkIn && !!booking.checkOut;
+  const hasDates = !!checkIn && !!checkOut;
   // Choose between availableRooms and rooms depending on whether dates
   // are provided.  When check‑in/out are specified we fetch only
   // available rooms; otherwise we fall back to all rooms.
-  const { 
-    data: roomsData, 
+  const {
+    data: roomsData,
     loading: roomsLoading,
     error: roomsError,
   } = useQuery(hasDates ? GET_AVAILABLE_ROOMS : GET_ROOMS, {
     variables: hasDates
-      ? { hotelId, checkIn: booking.checkIn, checkOut: booking.checkOut }
+      ? { hotelId, checkIn, checkOut, adults, children }
       : { hotelId },
     skip: !hotelId,
+  });
+
+  const { data: countData } = useQuery(GET_AVAILABLE_ROOMS_COUNT, {
+    variables: { hotelId, checkIn, checkOut, adults, children },
+    skip: !hotelId || !hasDates,
   });
 
   // Determine array of rooms from either the rooms or availableRooms fields
@@ -135,10 +142,30 @@ export default function RoomsListPage() {
   });
   const roomTypes = Object.values(grouped);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const roomsPerPage = 4;
+
   const handleSelect = (roomId: string) => {
-    updateBooking({ roomId });
+    const booking = {
+      checkIn,
+      checkOut,
+      adults,
+      children,
+      guests: adults + children,
+      roomId,
+      hotelId,
+    };
+    if (typeof window !== "undefined") {
+      localStorage.setItem("booking", JSON.stringify(booking));
+    }
     router.push(`/hotel/rooms/${roomId}`);
   };
+
+  const totalPages = Math.ceil(roomTypes.length / roomsPerPage);
+  const paginatedRooms = roomTypes.slice(
+    (currentPage - 1) * roomsPerPage,
+    currentPage * roomsPerPage
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -157,7 +184,27 @@ export default function RoomsListPage() {
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Chambres disponibles</h1>
+        <div className="flex space-x-4 border-b mb-4">
+          <button className="py-2 px-4 text-blue-600 border-b-2 border-blue-600 font-semibold">Hotels</button>
+          <button className="py-2 px-4 text-gray-500">Experiences</button>
+          <button className="py-2 px-4 text-gray-500">Hébergements</button>
+          <button className="py-2 px-4 text-gray-500">Aventures</button>
+        </div>
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold">Découvrez nos hotels</h2>
+          <div className="flex space-x-2 mt-2">
+            <button className="px-4 py-2 text-sm border rounded-full">Boutique</button>
+            <button className="px-4 py-2 text-sm border rounded-full">Luxe</button>
+            <button className="px-4 py-2 text-sm border rounded-full">Familial</button>
+            <button className="px-4 py-2 text-sm border rounded-full">Romantique</button>
+          </div>
+        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Chambres disponibles</h1>
+        {countData && (
+          <p className="text-gray-600 mb-6">
+            {countData.availableRoomsCount} chambre(s) disponible(s)
+          </p>
+        )}
         {roomsLoading || hotelsLoading ? (
           <p>Loading rooms…</p>
         ) : roomsError || hotelsError ? (
@@ -165,48 +212,70 @@ export default function RoomsListPage() {
         ) : roomTypes.length === 0 ? (
           <p>No rooms available for the selected dates.</p>
         ) : (
-          <div className="space-y-6">
-            {roomTypes.map((room: any) => (
-              <div
-                key={room.roomId}
-                className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                onClick={() => handleSelect(room.roomId)}
-              >
-                <div className="flex items-start space-x-4">
-                  {room.image ? (
-                    <img
-                      src={room.image}
-                      alt={room.type}
-                      className="w-28 h-20 object-cover rounded"
-                    />
-                  ) : (
-                    <div className="w-28 h-20 bg-gray-200 rounded"></div>
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {room.type}
-                    </h3>
-                    {room.features && room.features.length > 0 ? (
-                      <p className="text-sm text-gray-600">
-                        {room.features.slice(0, 3).join(", ")}
-                      </p>
+          <>
+            <div className="space-y-6">
+              {paginatedRooms.map((room: any) => (
+                <div
+                  key={room.roomId}
+                  className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleSelect(room.roomId)}
+                >
+                  <div className="flex items-start space-x-4">
+                    {room.image ? (
+                      <img
+                        src={room.image}
+                        alt={room.type}
+                        className="w-28 h-20 object-cover rounded"
+                      />
                     ) : (
-                      room.amenities && room.amenities.length > 0 && (
-                        <p className="text-sm text-gray-600">
-                          {room.amenities.slice(0, 3).join(", ")}
-                        </p>
-                      )
+                      <div className="w-28 h-20 bg-gray-200 rounded"></div>
                     )}
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        {room.type}
+                      </h3>
+                      {room.features && room.features.length > 0 ? (
+                        <p className="text-sm text-gray-600">
+                          {room.features.slice(0, 3).join(", ")}
+                        </p>
+                      ) : (
+                        room.amenities &&
+                        room.amenities.length > 0 && (
+                          <p className="text-sm text-gray-600">
+                            {room.amenities.slice(0, 3).join(", ")}
+                          </p>
+                        )
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-base font-bold text-gray-900">
+                      {room.price}€/nuit
+                    </span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-base font-bold text-gray-900">
-                    {room.price}€/nuit
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <div className="flex justify-center items-center mt-8 space-x-4">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border rounded-md disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border rounded-md disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </>
         )}
         <div className="mt-8 text-center">
           <button
