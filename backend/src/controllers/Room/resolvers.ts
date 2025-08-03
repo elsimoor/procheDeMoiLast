@@ -2,6 +2,7 @@
 import { IResolvers } from 'apollo-server-express';
 import RoomModel from '../../models/RoomModel';
 import ReservationModel from '../../models/ReservationModel';
+import HotelModel from '../../models/HotelModel';
 
 interface Context {
   user?: { id: string };
@@ -29,6 +30,11 @@ interface MutationUpdateArgs {
 }
 
 export const roomResolvers: IResolvers<unknown, Context> = {
+  Room: {
+    hotel: async (room: any) => {
+      return await HotelModel.findById(room.hotelId);
+    },
+  },
   Query: {
     rooms: async (
       _parent,
@@ -54,15 +60,14 @@ export const roomResolvers: IResolvers<unknown, Context> = {
      */
     availableRooms: async (
       _parent,
-      { hotelId, checkIn, checkOut, adults, children }: { hotelId: string; checkIn: string; checkOut: string; adults: number; children: number }
+      { hotelId, checkIn, checkOut }: { hotelId: string; checkIn: string; checkOut: string }
     ) => {
       const start = new Date(checkIn);
       const end = new Date(checkOut);
-      const totalGuests = adults + children;
       if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
         return [];
       }
-      const rooms = await RoomModel.find({ hotelId, isActive: true, status: 'available', capacity: { $gte: totalGuests } });
+      const rooms = await RoomModel.find({ hotelId, isActive: true, status: 'available' });
       if (!rooms || rooms.length === 0) return [];
       const reservations = await ReservationModel.find({ businessId: hotelId, businessType: 'hotel' });
       return rooms.filter((room: any) => {
@@ -76,32 +81,6 @@ export const roomResolvers: IResolvers<unknown, Context> = {
         });
         return !conflict;
       });
-    },
-    availableRoomsCount: async (
-      _parent,
-      { hotelId, checkIn, checkOut, adults, children }: { hotelId: string; checkIn: string; checkOut: string; adults: number; children: number }
-    ) => {
-      const start = new Date(checkIn);
-      const end = new Date(checkOut);
-      const totalGuests = adults + children;
-      if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
-        return 0;
-      }
-      const rooms = await RoomModel.find({ hotelId, isActive: true, status: 'available', capacity: { $gte: totalGuests } });
-      if (!rooms || rooms.length === 0) return 0;
-      const reservations = await ReservationModel.find({ businessId: hotelId, businessType: 'hotel' });
-      const availableRooms = rooms.filter((room: any) => {
-        const conflict = reservations.some((res: any) => {
-          if (!res.roomId) return false;
-          if (String(res.roomId) !== String(room._id)) return false;
-          const resStart = res.checkIn ? new Date(res.checkIn) : res.date ? new Date(res.date) : null;
-          const resEnd = res.checkOut ? new Date(res.checkOut) : resStart;
-          if (!resStart || !resEnd) return false;
-          return start < resEnd && end > resStart;
-        });
-        return !conflict;
-      });
-      return availableRooms.length;
     }
   },
 

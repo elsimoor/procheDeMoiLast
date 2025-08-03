@@ -27,6 +27,7 @@ export const roomTypeDef = gql`
     description: String
     createdAt: Date!
     updatedAt: Date!
+    hotel: Hotel
   }
 
   extend type Query {
@@ -37,7 +38,6 @@ export const roomTypeDef = gql`
     overlapping check‑in/check‑out dates for that room.  Both
     parameters are required and should be ISO formatted dates.
     """
-    availableRooms(hotelId: ID!, checkIn: Date!, checkOut: Date!, adults: Int!, children: Int!): [Room!]!
-    availableRoomsCount(hotelId: ID!, checkIn: Date!, checkOut: Date!, adults: Int!, children: Int!): Int!
+    availableRooms(hotelId: ID!, checkIn: Date!, checkOut: Date!): [Room!]!
   }
 `;

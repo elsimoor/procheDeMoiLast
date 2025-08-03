@@ -64,16 +64,10 @@ export default function CheckoutPage() {
   }, [booking.checkIn, booking.checkOut]);
   const room = data?.room;
   const basePrice = room ? room.price * nights : 0;
-  const extras = booking.extras || {};
-  const extrasCost = (() => {
-    let cost = 0;
-    if (extras.breakfast) cost += 20 * nights;
-    if (extras.parking) cost += 15 * nights;
-    if (extras.champagne) cost += 50;
-    return cost;
-  })();
+  const amenities = booking.amenities || [];
+  const amenitiesCost = amenities.reduce((total: number, amenity: any) => total + amenity.price, 0);
   const tax = nights * 10; // simple tax estimate (€10/night) to match mockup
-  const total = basePrice + extrasCost + tax;
+  const total = basePrice + amenitiesCost + tax;
 
   const handleReserve = async () => {
     if (!room) return;
@@ -151,16 +145,25 @@ export default function CheckoutPage() {
               </p>
               <h3 className="text-lg font-semibold mb-2">Options</h3>
               <ul className="list-disc list-inside mb-4 text-sm text-gray-700 space-y-1">
-                {extras.breakfast && <li>Breakfast included</li>}
-                {extras.parking && <li>Parking included</li>}
-                {extras.champagne && <li>Champagne bottle</li>}
-                {!extras.breakfast && !extras.parking && !extras.champagne && <li>No extras selected</li>}
+                {amenities.length > 0 ? (
+                  amenities.map((amenity: any) => (
+                    <li key={amenity.name}>
+                      {amenity.name} (+${amenity.price.toFixed(2)})
+                    </li>
+                  ))
+                ) : (
+                  <li>No extras selected</li>
+                )}
               </ul>
               <h3 className="text-lg font-semibold mb-2">Prix</h3>
               <div className="text-sm text-gray-700 space-y-1">
                 <div className="flex justify-between">
                   <span>Prix de base</span>
                   <span>${basePrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Amenities</span>
+                  <span>${amenitiesCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Taxes et frais</span>
