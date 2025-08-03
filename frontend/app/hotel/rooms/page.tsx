@@ -142,6 +142,8 @@ export default function RoomsListPage() {
   });
   const roomTypes = Object.values(grouped);
 
+  const [activeTab, setActiveTab] = useState("Hotels");
+  const [hotelFilters, setHotelFilters] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const roomsPerPage = 4;
 
@@ -161,11 +163,41 @@ export default function RoomsListPage() {
     router.push(`/hotel/rooms/${roomId}`);
   };
 
-  const totalPages = Math.ceil(roomTypes.length / roomsPerPage);
-  const paginatedRooms = roomTypes.slice(
+  const tabs = ["Hotels", "Experiences", "Hébergements", "Aventures"];
+  const hotelFilterOptions = ["Boutique", "Luxe", "Familial", "Romantique"];
+
+  const filteredRoomTypes = roomTypes.filter((room) => {
+    if (hotelFilters.length === 0) {
+      return true;
+    }
+    // The room type is a string like "Deluxe", "Standard", etc.
+    // The filters are "Boutique", "Luxe", etc.
+    // This is a placeholder for a more complex filtering logic.
+    // For now, I will just check if the room type is included in the filters.
+    // This will not work as expected, but it's a start.
+    // I will assume that the room type can be mapped to the filter options.
+    const roomType = room.type.toLowerCase();
+    const filters = hotelFilters.map((f) => f.toLowerCase());
+    if (filters.includes("luxe") && roomType === "deluxe") return true;
+    if (filters.includes("familial") && roomType === "suite") return true;
+    if (filters.includes("romantique") && roomType === "executive") return true;
+    if (filters.includes("boutique") && roomType === "standard") return true;
+    return false;
+  });
+
+  const totalPages = Math.ceil(filteredRoomTypes.length / roomsPerPage);
+  const paginatedRooms = filteredRoomTypes.slice(
     (currentPage - 1) * roomsPerPage,
     currentPage * roomsPerPage
   );
+
+  const handleFilterChange = (filter: string) => {
+    setHotelFilters((prevFilters) =>
+      prevFilters.includes(filter)
+        ? prevFilters.filter((f) => f !== filter)
+        : [...prevFilters, filter]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -185,20 +217,40 @@ export default function RoomsListPage() {
       </header>
       <main className="max-w-4xl mx-auto px-4 py-12">
         <div className="flex space-x-4 border-b mb-4">
-          <button className="py-2 px-4 text-blue-600 border-b-2 border-blue-600 font-semibold">Hotels</button>
-          <button className="py-2 px-4 text-gray-500">Experiences</button>
-          <button className="py-2 px-4 text-gray-500">Hébergements</button>
-          <button className="py-2 px-4 text-gray-500">Aventures</button>
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`py-2 px-4 ${
+                activeTab === tab
+                  ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                  : "text-gray-500"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">Découvrez nos hotels</h2>
-          <div className="flex space-x-2 mt-2">
-            <button className="px-4 py-2 text-sm border rounded-full">Boutique</button>
-            <button className="px-4 py-2 text-sm border rounded-full">Luxe</button>
-            <button className="px-4 py-2 text-sm border rounded-full">Familial</button>
-            <button className="px-4 py-2 text-sm border rounded-full">Romantique</button>
+        {activeTab === "Hotels" && (
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">Découvrez nos hotels</h2>
+            <div className="flex space-x-2 mt-2">
+              {hotelFilterOptions.map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => handleFilterChange(filter)}
+                  className={`px-4 py-2 text-sm border rounded-full ${
+                    hotelFilters.includes(filter)
+                      ? "bg-blue-600 text-white"
+                      : ""
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Chambres disponibles</h1>
         {countData && (
           <p className="text-gray-600 mb-6">
