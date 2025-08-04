@@ -87,9 +87,15 @@ export const roomResolvers: IResolvers<unknown, Context> = {
       if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
         return 0;
       }
+
+      console.log(`Checking available rooms for hotel ${hotelId} from ${checkIn} to ${checkOut} for ${totalGuests} guests`);
       const rooms = await RoomModel.find({ hotelId, isActive: true, status: 'available', capacity: { $gte: totalGuests } });
       if (!rooms || rooms.length === 0) return 0;
-      const reservations = await ReservationModel.find({ businessId: hotelId, businessType: 'hotel' });
+      const reservations = await ReservationModel.find({ 
+        businessId: hotelId, 
+        businessType: 'hotel',
+        status: { $in: ['pending', 'confirmed'] }
+      });
       const availableRooms = rooms.filter((room: any) => {
         const conflict = reservations.some((res: any) => {
           if (!res.roomId) return false;
