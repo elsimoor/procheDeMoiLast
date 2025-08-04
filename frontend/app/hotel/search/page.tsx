@@ -1,9 +1,12 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
+import { DateRangePicker } from "../../../components/ui/DateRangePicker";
+import { DateRange } from "react-day-picker";
+import { addDays } from "date-fns";
 
 /*
  * Hotel reservation search page
@@ -18,8 +21,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/
  */
 export default function HotelSearchPage() {
   const router = useRouter();
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: addDays(new Date(), 7),
+  });
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
 
@@ -32,8 +37,12 @@ export default function HotelSearchPage() {
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          if (parsed.checkIn) setCheckIn(parsed.checkIn);
-          if (parsed.checkOut) setCheckOut(parsed.checkOut);
+          if (parsed.checkIn && parsed.checkOut) {
+            setDate({
+              from: new Date(parsed.checkIn),
+              to: new Date(parsed.checkOut),
+            });
+          }
           if (parsed.adults) setAdults(parsed.adults);
           if (parsed.children !== undefined) setChildren(parsed.children);
         } catch (e) {
@@ -45,17 +54,13 @@ export default function HotelSearchPage() {
 
   // Persist the current search data and navigate to the rooms list
   const handleSearch = () => {
-    if (!checkIn || !checkOut) {
-      alert("Please select both check‑in and check‑out dates");
-      return;
-    }
-    if (new Date(checkOut) <= new Date(checkIn)) {
-      alert("Check‑out date must be after check‑in date");
+    if (!date?.from || !date?.to) {
+      alert("Please select both check-in and check-out dates");
       return;
     }
     const searchParams = new URLSearchParams({
-      checkIn,
-      checkOut,
+      checkIn: date.from.toISOString().split("T")[0],
+      checkOut: date.to.toISOString().split("T")[0],
       adults: adults.toString(),
       children: children.toString(),
     });
@@ -65,149 +70,85 @@ export default function HotelSearchPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
-      <header className="border-b border-gray-200 py-4 px-6 flex items-center justify-between">
+      <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-6">
         <div className="flex items-center space-x-2">
-          <span className="font-bold text-xl text-gray-900">StayEase</span>
+          <span className="font-bold text-2xl text-white">StayEase</span>
         </div>
-        <nav className="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
-          <a href="#" className="hover:text-blue-600">
-            Explore
-          </a>
-          <a href="#" className="hover:text-blue-600">
-            Wishlists
-          </a>
-          <a href="#" className="hover:text-blue-600">
-            Trips
-          </a>
-          <a href="#" className="hover:text-blue-600">
-            Messages
-          </a>
+        <nav className="hidden md:flex space-x-8 text-sm font-medium text-white">
+          <a href="#" className="hover:text-gray-200 transition-colors">Explore</a>
+          <a href="#" className="hover:text-gray-200 transition-colors">Wishlists</a>
+          <a href="#" className="hover:text-gray-200 transition-colors">Trips</a>
+          <a href="#" className="hover:text-gray-200 transition-colors">Messages</a>
         </nav>
         <div className="flex items-center space-x-4">
-          <a
-            href="/login"
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100"
-          >
+          <a href="/login" className="inline-flex items-center px-4 py-2 border border-transparent rounded-full text-sm font-medium text-white bg-white/20 hover:bg-white/30 transition-colors">
             Log in
           </a>
         </div>
       </header>
 
       {/* Hero image */}
-      <div className="relative w-full h-96 overflow-hidden">
-        {/* Hero image as background */}
+      <div className="relative w-full h-[500px] overflow-hidden">
         <img
           src="/searchHotelImage.png"
           alt="Hotel room"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent"></div>
-        {/* Centered content */}
-        <div className="relative z-10 flex flex-col items-center justify-center h-full px-4">
-          <h1 className="text-white text-4xl md:text-5xl font-bold text-center drop-shadow-lg">
-        Find Your Perfect Stay
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
+          <h1 className="text-white text-4xl md:text-6xl font-bold tracking-tight">
+            Find Your Perfect Stay
           </h1>
-          <p className="text-white text-lg md:text-xl text-center mt-4 drop-shadow-md">
-        Book your next hotel stay with ease
+          <p className="text-white text-lg md:text-xl mt-4 max-w-2xl">
+            Book your next hotel stay with ease. We offer the best prices and a seamless booking experience.
           </p>
         </div>
       </div>
 
       {/* Search panel */}
-      <div className="max-w-xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="flex-1 border border-gray-300 rounded-full py-3 px-4 text-gray-700 text-center hover:bg-gray-50"
-              >
-                Adults: {adults}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setAdults((a) => Math.max(1, a - 1))}
-                  className="px-2 py-1 border rounded-md"
-                >
-                  -
-                </button>
+      <div className="max-w-4xl mx-auto -mt-16 bg-white rounded-lg shadow-lg p-8 z-20 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select your dates
+            </label>
+            <DateRangePicker date={date} onDateChange={setDate} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Adults</label>
+              <div className="flex items-center justify-between border rounded-lg p-2">
+                <button onClick={() => setAdults(a => Math.max(1, a - 1))} className="text-lg font-bold">-</button>
                 <span>{adults}</span>
-                <button
-                  onClick={() => setAdults((a) => a + 1)}
-                  className="px-2 py-1 border rounded-md"
-                >
-                  +
-                </button>
+                <button onClick={() => setAdults(a => a + 1)} className="text-lg font-bold">+</button>
               </div>
-            </PopoverContent>
-          </Popover>
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="flex-1 border border-gray-300 rounded-full py-3 px-4 text-gray-700 text-center hover:bg-gray-50"
-              >
-                Children: {children}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setChildren((c) => Math.max(0, c - 1))}
-                  className="px-2 py-1 border rounded-md"
-                >
-                  -
-                </button>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Children</label>
+              <div className="flex items-center justify-between border rounded-lg p-2">
+                <button onClick={() => setChildren(c => Math.max(0, c - 1))} className="text-lg font-bold">-</button>
                 <span>{children}</span>
-                <button
-                  onClick={() => setChildren((c) => c + 1)}
-                  className="px-2 py-1 border rounded-md"
-                >
-                  +
-                </button>
+                <button onClick={() => setChildren(c => c + 1)} className="text-lg font-bold">+</button>
               </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Check‑in
-            </label>
-            <input
-              type="date"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Check‑out
-            </label>
-            <input
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
+            </div>
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="mt-6">
           <button
             type="button"
             onClick={handleSearch}
-            className="bg-blue-600 text-white rounded-full px-6 py-3 text-sm font-semibold hover:bg-blue-700"
+            className="w-full bg-blue-600 text-white rounded-lg py-3 text-lg font-semibold hover:bg-blue-700 transition-colors"
           >
-            Search
+            Search Hotels
           </button>
         </div>
       </div>
+      <footer className="w-full bg-gray-100 mt-16 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+          <p>&copy; {new Date().getFullYear()} StayEase. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
