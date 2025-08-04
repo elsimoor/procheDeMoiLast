@@ -41,6 +41,8 @@ export default function RestaurantMenus() {
           return
         }
         const data = await res.json()
+
+        console.log("Session data:", data)
         if (data.businessType && data.businessType.toLowerCase() === "restaurant" && data.businessId) {
           setRestaurantId(data.businessId)
         } else {
