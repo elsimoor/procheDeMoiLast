@@ -5,6 +5,8 @@ import type React from "react"
 import { useState, useEffect, useMemo } from "react"
 import { Plus, Edit, Trash2, Search, Filter, DollarSign, Clock, Star, UtensilsCrossed, X } from "lucide-react"
 import { gql, useQuery, useMutation } from "@apollo/client"
+import { ImageUpload } from "@/components/ui/ImageUpload"
+import { uploadImage } from "@/lib/firebase"
 
 interface MenuItem {
   id: string
@@ -24,6 +26,7 @@ export default function RestaurantMenus() {
   const [searchTerm, setSearchTerm] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   // Fetch the current session to determine the restaurant context.  We
   // derive the restaurantId and businessType from the session so that
@@ -245,6 +248,19 @@ export default function RestaurantMenus() {
     } catch (err) {
       console.error(err)
       alert("Failed to delete menu item")
+    }
+  }
+
+  const handleImageUpload = async (files: File[]) => {
+    setUploading(true)
+    try {
+      const urls = await Promise.all(files.map(uploadImage))
+      setFormData({ ...formData, image: urls[0] })
+    } catch (err) {
+      console.error(err)
+      alert("Failed to upload image")
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -556,13 +572,14 @@ export default function RestaurantMenus() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                  <input
-                    type="url"
-                    value={formData.image || ""}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  />
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                  <ImageUpload onUpload={handleImageUpload} uploading={uploading} />
+                  {formData.image && (
+                    <div className="mt-4">
+                      <img src={formData.image} alt="Menu item image" className="w-32 h-32 object-cover rounded-lg" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center space-x-4">
                   <label className="flex items-center">
