@@ -10,13 +10,18 @@ const GET_SALONS = gql`
       name
       description
       images
-      services {
-        name
-        description
-        price
-      }
     }
   }
+`
+
+const GET_SERVICES = gql`
+    query GetServices($businessId: ID!, $businessType: String!) {
+        services(businessId: $businessId, businessType: $businessType) {
+            name
+            description
+            price
+        }
+    }
 `
 
 /**
@@ -26,13 +31,20 @@ const GET_SALONS = gql`
  * browse services.
  */
 export default function SalonLanding() {
-  const { data, loading, error } = useQuery(GET_SALONS)
+  const { data: salonsData, loading: salonsLoading, error: salonsError } = useQuery(GET_SALONS)
 
-  if (loading) return <p>Loading...</p>
-  if (error) return <p>Error :(</p>
-
-  const salons = data?.salons || []
+  const salons = salonsData?.salons || []
   const salon = salons[0] || {}
+
+  const { data: servicesData, loading: servicesLoading, error: servicesError } = useQuery(GET_SERVICES, {
+    variables: { businessId: salon.id, businessType: "salon" },
+    skip: !salon.id,
+  })
+
+  if (salonsLoading || servicesLoading) return <p>Loading...</p>
+  if (salonsError || servicesError) return <p>Error :(</p>
+
+  const services = servicesData?.services || []
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -90,7 +102,7 @@ export default function SalonLanding() {
         <section className="max-w-7xl mx-auto px-4 py-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">Nos Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {(salon.services || []).slice(0, 3).map((service: any) => (
+            {services.slice(0, 3).map((service: any) => (
               <div key={service.name} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300">
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{service.name}</h3>
