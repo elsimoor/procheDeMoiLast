@@ -86,10 +86,3 @@ export default function HotelSidebar({ sidebarOpen, setSidebarOpen }: { sidebarO
     </>
   )
 }
-
-
-// /components/hotel/HotelSidebar.tsx
-
-
-
-
