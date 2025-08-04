@@ -10,13 +10,18 @@ const GET_RESTAURANTS = gql`
       name
       description
       images
-      menuItems {
-        name
-        description
-        price
-      }
     }
   }
+`
+
+const GET_MENU_ITEMS = gql`
+    query GetMenuItems($restaurantId: ID!) {
+        menuItems(restaurantId: $restaurantId) {
+            name
+            description
+            price
+        }
+    }
 `
 
 /**
@@ -24,13 +29,20 @@ const GET_RESTAURANTS = gql`
  * atmosphere of the restaurant and encourages guests to book a table.
  */
 export default function RestaurantLanding() {
-  const { data, loading, error } = useQuery(GET_RESTAURANTS)
+  const { data: restaurantsData, loading: restaurantsLoading, error: restaurantsError } = useQuery(GET_RESTAURANTS)
 
-  if (loading) return <p>Loading...</p>
-  if (error) return <p>Error :(</p>
-
-  const restaurants = data?.restaurants || []
+  const restaurants = restaurantsData?.restaurants || []
   const restaurant = restaurants[0] || {}
+
+  const { data: menuItemsData, loading: menuItemsLoading, error: menuItemsError } = useQuery(GET_MENU_ITEMS, {
+    variables: { restaurantId: restaurant.id },
+    skip: !restaurant.id,
+  })
+
+  if (restaurantsLoading || menuItemsLoading) return <p>Loading...</p>
+  if (restaurantsError || menuItemsError) return <p>Error :(</p>
+
+  const menuItems = menuItemsData?.menuItems || []
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -88,7 +100,7 @@ export default function RestaurantLanding() {
         <section className="max-w-7xl mx-auto px-4 py-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">Notre Menu</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {(restaurant.menuItems || []).slice(0, 3).map((item: any) => (
+            {menuItems.slice(0, 3).map((item: any) => (
               <div key={item.name} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300">
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{item.name}</h3>
