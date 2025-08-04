@@ -39,29 +39,86 @@ const GET_TABLES = gql`
  * Landing page for the restaurant service.  Highlights the cuisine and
  * atmosphere of the restaurant and encourages guests to book a table.
  */
-export default function RestaurantLanding() {
-  const { data: restaurantsData, loading: restaurantsLoading, error: restaurantsError } = useQuery(GET_RESTAURANTS)
-
-  const restaurants = restaurantsData?.restaurants || []
-  const restaurant = restaurants[1] || {}
-
-
-  console.log("Restaurant data:", restaurant)
+const RestaurantSection = ({ restaurant }: { restaurant: any }) => {
   const { data: menuItemsData, loading: menuItemsLoading, error: menuItemsError } = useQuery(GET_MENU_ITEMS, {
     variables: { restaurantId: restaurant.id },
-    skip: !restaurant.id,
-  })
+  });
 
   const { data: tablesData, loading: tablesLoading, error: tablesError } = useQuery(GET_TABLES, {
     variables: { restaurantId: restaurant.id },
-    skip: !restaurant.id,
-  })
+  });
 
-  if (restaurantsLoading || menuItemsLoading || tablesLoading) return <p>Loading...</p>
-  if (restaurantsError || menuItemsError || tablesError) return <p>Error :(</p>
+  if (menuItemsLoading || tablesLoading) return <p>Loading...</p>;
+  if (menuItemsError || tablesError) return <p>Error :(</p>;
 
-  const menuItems = menuItemsData?.menuItems || []
-  const tables = tablesData?.tables || []
+  const menuItems = menuItemsData?.menuItems || [];
+  const tables = tablesData?.tables || [];
+
+  return (
+    <div className="mb-16">
+      <div
+        className="relative bg-cover bg-center h-[70vh]"
+        style={{ backgroundImage: `url('${restaurant.images?.[0] || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5'}')` }}
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div className="max-w-3xl mx-auto px-4 py-24 text-center relative z-10">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            {restaurant.name}
+          </h1>
+          <p className="text-lg md:text-xl text-gray-100 mb-8">
+            {restaurant.description}
+          </p>
+          <Link
+            href={`/restaurant/booking?restaurantId=${restaurant.id}`}
+            className="inline-block bg-red-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-red-700 transition-transform transform hover:scale-105"
+          >
+            Réserver une table
+          </Link>
+        </div>
+      </div>
+      <section className="max-w-7xl mx-auto px-4 py-16">
+        <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">Notre Menu</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {menuItems.slice(0, 6).map((item: any) => (
+            <div key={item.name} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300">
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.name}</h3>
+                <p className="text-sm text-gray-600 mb-4 h-16 overflow-hidden">{item.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-bold text-red-600">{item.price}€</span>
+                  <Link href={`/restaurant/menus?restaurantId=${restaurant.id}`} className="text-red-600 font-semibold hover:underline">
+                    Voir le menu
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="bg-gray-100 py-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-gray-900 mb-10">Nos Tables</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {tables.map((table: any) => (
+              <div key={table.id} className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-2xl font-bold mb-2">Table {table.number}</h3>
+                <p className="text-gray-600">Capacité: {table.capacity}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+export default function RestaurantLanding() {
+  const { data: restaurantsData, loading: restaurantsLoading, error: restaurantsError } = useQuery(GET_RESTAURANTS)
+
+  if (restaurantsLoading) return <p>Loading...</p>
+  if (restaurantsError) return <p>Error :(</p>
+
+  const restaurants = restaurantsData?.restaurants || []
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -69,7 +126,7 @@ export default function RestaurantLanding() {
       <header className="bg-white shadow-sm sticky top-0 z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-xl text-red-600">{restaurant.name || "Gastronomie"}</span>
+            <span className="font-bold text-xl text-red-600">Gastronomie</span>
           </div>
           <nav className="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
             <Link href="/restaurant" className="hover:text-red-600">Accueil</Link>
@@ -95,60 +152,9 @@ export default function RestaurantLanding() {
       </header>
       {/* Hero */}
       <main className="flex-1">
-        <div
-          className="relative bg-cover bg-center h-[70vh]"
-          style={{ backgroundImage: `url('${restaurant.images?.[0] || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5'}')` }}
-        >
-          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-          <div className="max-w-3xl mx-auto px-4 py-24 text-center relative z-10">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              {restaurant.name || "Bienvenue au Gastronomie"}
-            </h1>
-            <p className="text-lg md:text-xl text-gray-100 mb-8">
-              {restaurant.description || "Savourez des plats raffinés préparés avec passion par nos chefs et profitez d’une atmosphère chaleureuse."}
-            </p>
-            <Link
-              href="/restaurant/booking"
-              className="inline-block bg-red-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-red-700 transition-transform transform hover:scale-105"
-            >
-              Réserver une table
-            </Link>
-          </div>
-        </div>
-        {/* Menu */}
-        <section className="max-w-7xl mx-auto px-4 py-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">Notre Menu</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {menuItems.slice(0, 6).map((item: any) => (
-              <div key={item.name} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300">
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{item.name}</h3>
-                  <p className="text-sm text-gray-600 mb-4 h-16 overflow-hidden">{item.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-red-600">{item.price}€</span>
-                    <Link href="/restaurant/menus" className="text-red-600 font-semibold hover:underline">
-                      Voir le menu
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-        {/* Tables */}
-        <section className="bg-gray-100 py-16">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-10">Nos Tables</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {tables.map((table: any) => (
-                <div key={table.id} className="bg-white rounded-lg shadow-lg p-6">
-                  <h3 className="text-2xl font-bold mb-2">Table {table.number}</h3>
-                  <p className="text-gray-600">Capacité: {table.capacity}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {restaurants.map((restaurant: any) => (
+            <RestaurantSection key={restaurant.id} restaurant={restaurant} />
+        ))}
         {/* Reservation Info */}
         <section className="max-w-7xl mx-auto px-4 py-16 text-center">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Réservez Votre Table</h2>
