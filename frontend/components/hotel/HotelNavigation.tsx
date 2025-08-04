@@ -10,9 +10,16 @@ const navigation = [
   { name: "Reservations", href: "/hotel/dashboard/reservations" },
   { name: "Guests", href: "/hotel/dashboard/guests" },
   { name: "Rooms", href: "/hotel/dashboard/rooms" },
+  { name: "Options", href: "/hotel/dashboard/options"},
+  { name: "Opening Hours", href: "/hotel/dashboard/opening-hours" },
   { name: "Pricing", href: "/hotel/dashboard/pricing" },
   { name: "Reviews", href: "/hotel/dashboard/reviews" },
+  // { name: "Settings", href: "/hotel/dashboard/settings" },
+
 ]
+
+
+
 
 export default function HotelNavigation() {
   const pathname = usePathname()
