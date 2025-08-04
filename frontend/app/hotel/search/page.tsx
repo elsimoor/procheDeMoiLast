@@ -58,11 +58,20 @@ export default function HotelSearchPage() {
       alert("Please select both check-in and check-out dates");
       return;
     }
-    const searchParams = new URLSearchParams({
+    const booking = {
       checkIn: date.from.toISOString().split("T")[0],
       checkOut: date.to.toISOString().split("T")[0],
-      adults: adults.toString(),
-      children: children.toString(),
+      adults: adults,
+      children: children,
+    };
+    if (typeof window !== "undefined") {
+      localStorage.setItem("booking", JSON.stringify(booking));
+    }
+    const searchParams = new URLSearchParams({
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut,
+        adults: booking.adults.toString(),
+        children: booking.children.toString(),
     });
     router.push(`/hotel/rooms?${searchParams.toString()}`);
   };
