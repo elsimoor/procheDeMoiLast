@@ -1,6 +1,23 @@
 "use client"
 
 import Link from "next/link"
+import { gql, useQuery } from "@apollo/client"
+
+const GET_SALONS = gql`
+  query GetSalons {
+    salons {
+      id
+      name
+      description
+      images
+      services {
+        name
+        description
+        price
+      }
+    }
+  }
+`
 
 /**
  * Landing page for the salon service.  Presents a luxurious hero
@@ -9,13 +26,21 @@ import Link from "next/link"
  * browse services.
  */
 export default function SalonLanding() {
+  const { data, loading, error } = useQuery(GET_SALONS)
+
+  if (loading) return <p>Loading...</p>
+  if (error) return <p>Error :(</p>
+
+  const salons = data?.salons || []
+  const salon = salons[0] || {}
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Navbar */}
-      <header className="bg-gray-50 border-b border-gray-200">
+      <header className="bg-white shadow-sm sticky top-0 z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <span className="font-bold text-xl text-pink-600">Salon&nbsp;Zenith</span>
+            <span className="font-bold text-xl text-pink-600">{salon.name || "Salon Zenith"}</span>
           </div>
           <nav className="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
             <Link href="/salon" className="hover:text-pink-600">Accueil</Link>
@@ -26,13 +51,13 @@ export default function SalonLanding() {
           <div className="flex items-center space-x-4">
             <Link
               href="/salon/booking"
-              className="hidden md:inline-block bg-pink-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-pink-700"
+              className="hidden md:inline-block bg-pink-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-pink-700 transition-colors"
             >
               Réserver maintenant
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
             >
               Se connecter
             </Link>
@@ -42,90 +67,95 @@ export default function SalonLanding() {
       {/* Hero */}
       <main className="flex-1">
         <div
-          className="relative bg-cover bg-center"
-          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1583267743713-0f36bcbc89e4')` }}
+          className="relative bg-cover bg-center h-[70vh]"
+          style={{ backgroundImage: `url('${salon.images?.[0] || 'https://images.unsplash.com/photo-1583267743713-0f36bcbc89e4'}')` }}
         >
           <div className="absolute inset-0 bg-black bg-opacity-40"></div>
           <div className="max-w-3xl mx-auto px-4 py-24 text-center relative z-10">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Laissez‑vous tenter par le luxe, rajeunissez vos sens
+              {salon.name || "Laissez‑vous tenter par le luxe, rajeunissez vos sens"}
             </h1>
             <p className="text-lg md:text-xl text-gray-100 mb-8">
-              Découvrez le summum de la détente et de la beauté au Salon&nbsp;Zenith. Notre équipe
-              d’experts se consacre à fournir des services personnalisés qui vous laisseront une
-              sensation de fraîcheur et d’éclat.
+              {salon.description || "Découvrez le summum de la détente et de la beauté au Salon Zenith. Notre équipe d’experts se consacre à fournir des services personnalisés qui vous laisseront une sensation de fraîcheur et d’éclat."}
             </p>
             <Link
               href="/salon/booking"
-              className="inline-block bg-pink-600 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-pink-700"
+              className="inline-block bg-pink-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-pink-700 transition-transform transform hover:scale-105"
             >
-              Réserver maintenant
+              Prendre rendez-vous
             </Link>
           </div>
         </div>
-        {/* Services teaser */}
-        <section className="max-w-6xl mx-auto px-4 py-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Nos services</h2>
-          <div className="flex flex-wrap gap-8 justify-center">
-            <div className="max-w-xs bg-white rounded-xl shadow overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9"
-                alt="Coiffure"
-                className="h-40 w-full object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Coiffure</h3>
-                <p className="text-sm text-gray-600">
-                  Transformez votre look avec nos stylistes experts. Des coupes classiques aux
-                  tendances modernes, nous créons un style qui vous convient.
-                </p>
+        {/* Services */}
+        <section className="max-w-7xl mx-auto px-4 py-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">Nos Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {(salon.services || []).slice(0, 3).map((service: any) => (
+              <div key={service.name} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300">
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{service.name}</h3>
+                  <p className="text-sm text-gray-600 mb-4 h-16 overflow-hidden">{service.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-bold text-pink-600">{service.price}€</span>
+                    <Link href="/salon/booking" className="text-pink-600 font-semibold hover:underline">
+                      Réserver
+                    </Link>
+                  </div>
+                </div>
               </div>
+            ))}
+          </div>
+        </section>
+        {/* Stylists */}
+        <section className="bg-pink-50 py-16">
+            <div className="max-w-7xl mx-auto px-4 text-center">
+                <h2 className="text-4xl font-bold text-gray-900 mb-10">Nos Stylistes Experts</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="text-center">
+                        <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61" alt="Stylist 1" className="w-32 h-32 rounded-full mx-auto mb-4" />
+                        <h3 className="text-xl font-bold">Jessica</h3>
+                        <p className="text-gray-600">Spécialiste couleur</p>
+                    </div>
+                    <div className="text-center">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e" alt="Stylist 2" className="w-32 h-32 rounded-full mx-auto mb-4" />
+                        <h3 className="text-xl font-bold">Marc</h3>
+                        <p className="text-gray-600">Expert en coupe</p>
+                    </div>
+                    <div className="text-center">
+                        <img src="https://images.unsplash.com/photo-1521119989659-a83eee488004" alt="Stylist 3" className="w-32 h-32 rounded-full mx-auto mb-4" />
+                        <h3 className="text-xl font-bold">Sophie</h3>
+                        <p className="text-gray-600">Maître styliste</p>
+                    </div>
+                </div>
             </div>
-            <div className="max-w-xs bg-white rounded-xl shadow overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1522337660859-ebc2f28d17b8"
-                alt="Massothérapie"
-                className="h-40 w-full object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Massothérapie</h3>
-                <p className="text-sm text-gray-600">
-                  Détendez‑vous et relaxez‑vous avec nos massages thérapeutiques. Nos thérapeutes
-                  qualifiés soulageront vos tensions et restaureront votre bien‑être.
-                </p>
-              </div>
+        </section>
+        {/* Testimonials */}
+        <section className="max-w-7xl mx-auto px-4 py-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">Ce que nos clients disent</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <p className="text-gray-600 mb-4">"Une expérience incroyable ! Je suis tellement contente de ma nouvelle coupe."</p>
+              <p className="font-bold text-gray-900">- Chloé</p>
             </div>
-            <div className="max-w-xs bg-white rounded-xl shadow overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c"
-                alt="Bronzage UV"
-                className="h-40 w-full object-cover"
-              />
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Bronzage UV</h3>
-                <p className="text-sm text-gray-600">
-                  Obtenez un éclat ensoleillé avec nos services de bronzage UV sûrs et efficaces.
-                  Personnalisez votre bronzage pour un look naturel.
-                </p>
-              </div>
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <p className="text-gray-600 mb-4">"Le meilleur salon de la ville. Le personnel est sympathique et professionnel."</p>
+              <p className="font-bold text-gray-900">- Isabelle</p>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <p className="text-gray-600 mb-4">"Je me sens comme une nouvelle femme ! Merci Salon Zenith."</p>
+              <p className="font-bold text-gray-900">- Amélie</p>
             </div>
           </div>
         </section>
       </main>
       {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200 py-6">
-        <div className="max-w-7xl mx-auto px-4 text-sm text-gray-600 flex justify-between items-center">
-          <span>@2024 Salon&nbsp;Zenith. Tous droits réservés.</span>
-          <div className="space-x-6">
-            <Link href="#" className="hover:text-pink-600">
-              Politique de confidentialité
-            </Link>
-            <Link href="#" className="hover:text-pink-600">
-              Conditions d’utilisation
-            </Link>
-            <Link href="#" className="hover:text-pink-600">
-              Nous contacter
-            </Link>
+      <footer className="bg-gray-800 text-white py-10">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p>&copy; {new Date().getFullYear()} Salon Zenith. Tous droits réservés.</p>
+          <div className="flex justify-center space-x-6 mt-4">
+            <Link href="#" className="hover:text-pink-400">Politique de confidentialité</Link>
+            <Link href="#" className="hover:text-pink-400">Conditions d’utilisation</Link>
+            <Link href="#" className="hover:text-pink-400">Nous contacter</Link>
           </div>
         </div>
       </footer>
