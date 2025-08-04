@@ -55,8 +55,7 @@ export default function HotelSidebar({ sidebarOpen, setSidebarOpen }: { sidebarO
                 </Transition.Child>
                 <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                   <div className="flex-shrink-0 flex items-center px-4">
-                    <Hotel className="h-8 w-8 text-white" />
-                    <span className="ml-2 text-white text-lg font-semibold">Hotel Dashboard</span>
+                    {/* Title has been moved to the navbar */}
                   </div>
                   <div className="mt-5 flex-1 px-2 space-y-1">
                     {/* Navigation items have been moved to the navbar */}
