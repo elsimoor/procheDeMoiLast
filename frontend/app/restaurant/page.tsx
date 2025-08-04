@@ -24,6 +24,17 @@ const GET_MENU_ITEMS = gql`
     }
 `
 
+const GET_TABLES = gql`
+    query GetTables($restaurantId: ID!) {
+        tables(restaurantId: $restaurantId) {
+            id
+            number
+            capacity
+            status
+        }
+    }
+`
+
 /**
  * Landing page for the restaurant service.  Highlights the cuisine and
  * atmosphere of the restaurant and encourages guests to book a table.
@@ -39,10 +50,16 @@ export default function RestaurantLanding() {
     skip: !restaurant.id,
   })
 
-  if (restaurantsLoading || menuItemsLoading) return <p>Loading...</p>
-  if (restaurantsError || menuItemsError) return <p>Error :(</p>
+  const { data: tablesData, loading: tablesLoading, error: tablesError } = useQuery(GET_TABLES, {
+    variables: { restaurantId: restaurant.id },
+    skip: !restaurant.id,
+  })
+
+  if (restaurantsLoading || menuItemsLoading || tablesLoading) return <p>Loading...</p>
+  if (restaurantsError || menuItemsError || tablesError) return <p>Error :(</p>
 
   const menuItems = menuItemsData?.menuItems || []
+  const tables = tablesData?.tables || []
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -100,7 +117,7 @@ export default function RestaurantLanding() {
         <section className="max-w-7xl mx-auto px-4 py-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">Notre Menu</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {menuItems.slice(0, 3).map((item: any) => (
+            {menuItems.slice(0, 6).map((item: any) => (
               <div key={item.name} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300">
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{item.name}</h3>
@@ -116,21 +133,19 @@ export default function RestaurantLanding() {
             ))}
           </div>
         </section>
-        {/* Chef's Specials */}
-        <section className="bg-red-50 py-16">
-            <div className="max-w-7xl mx-auto px-4 text-center">
-                <h2 className="text-4xl font-bold text-gray-900 mb-10">Les Spécialités du Chef</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                        <h3 className="text-2xl font-bold mb-2">Filet Mignon</h3>
-                        <p className="text-gray-600">Servi avec une sauce au poivre et des légumes de saison.</p>
-                    </div>
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                        <h3 className="text-2xl font-bold mb-2">Homard Thermidor</h3>
-                        <p className="text-gray-600">Un classique de la cuisine française, préparé à la perfection.</p>
-                    </div>
+        {/* Tables */}
+        <section className="bg-gray-100 py-16">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <h2 className="text-4xl font-bold text-gray-900 mb-10">Nos Tables</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {tables.map((table: any) => (
+                <div key={table.id} className="bg-white rounded-lg shadow-lg p-6">
+                  <h3 className="text-2xl font-bold mb-2">Table {table.number}</h3>
+                  <p className="text-gray-600">Capacité: {table.capacity}</p>
                 </div>
+              ))}
             </div>
+          </div>
         </section>
         {/* Reservation Info */}
         <section className="max-w-7xl mx-auto px-4 py-16 text-center">
