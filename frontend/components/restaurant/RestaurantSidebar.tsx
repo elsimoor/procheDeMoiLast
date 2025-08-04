@@ -68,20 +68,7 @@ export default function RestaurantSidebar({ sidebarOpen, setSidebarOpen }: { sid
         </Dialog>
       </Transition.Root>
 
-      {/* Static sidebar for desktop */}
-      <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-        <div className="flex-1 flex flex-col min-h-0 bg-red-800">
-          <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <div className="flex items-center flex-shrink-0 px-4">
-              <UtensilsCrossed className="h-8 w-8 text-white" />
-              <span className="ml-2 text-white text-lg font-semibold">Restaurant Dashboard</span>
-            </div>
-            <div className="mt-5 flex-1 px-2 space-y-1">
-              {/* Navigation items have been moved to the navbar */}
-            </div>
-          </div>
-        </div>
-      </div>
+  
     </>
   )
 }

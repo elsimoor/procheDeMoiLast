@@ -43,8 +43,10 @@ export default function RestaurantLanding() {
   const { data: restaurantsData, loading: restaurantsLoading, error: restaurantsError } = useQuery(GET_RESTAURANTS)
 
   const restaurants = restaurantsData?.restaurants || []
-  const restaurant = restaurants[0] || {}
+  const restaurant = restaurants[1] || {}
 
+
+  console.log("Restaurant data:", restaurant)
   const { data: menuItemsData, loading: menuItemsLoading, error: menuItemsError } = useQuery(GET_MENU_ITEMS, {
     variables: { restaurantId: restaurant.id },
     skip: !restaurant.id,
