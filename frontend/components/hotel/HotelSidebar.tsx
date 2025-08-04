@@ -50,3 +50,10 @@ export default function HotelSidebar() {
     </div>
   )
 }
+
+
+// /components/hotel/HotelSidebar.tsx
+
+
+
+
