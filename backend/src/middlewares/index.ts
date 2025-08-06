@@ -6,6 +6,7 @@ import {
   BatchTable,
   BatchService,
   BatchUStaff,
+  BatchRestaurant
 } from "./DataLoader";
 
 import { isAuthenticated } from "./isAuthenticated";
@@ -25,5 +26,6 @@ export {
   BatchTable,
   BatchService,
   BatchUStaff,
+  BatchRestaurant
 
 };

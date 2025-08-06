@@ -44,7 +44,7 @@ const reservationSchema = new Schema<ReservationDocument>({
     // implementation assumed a hotel reservation, the businessId now
     // always points to a Client (tenant) document.  Mongoose population
     // using this ref will therefore load Client records.
-    ref: 'Client',
+    refPath: 'Client',
   },
   businessType: {
     type: String,

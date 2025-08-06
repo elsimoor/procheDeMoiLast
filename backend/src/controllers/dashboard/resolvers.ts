@@ -81,17 +81,20 @@ export const dashboardResolvers = {
       const targetDate = moment.utc(date).startOf('day').toDate();
       const nextDay = moment.utc(targetDate).add(1, 'days').toDate();
 
+      console.log(`restaurant: ${restaurant}`);
       const reservations = await ReservationModel.find({
-        businessId: restaurant.clientId,
+        businessId: restaurant._id,
         businessType: 'restaurant',
         date: { $gte: targetDate, $lt: nextDay },
       }).populate('businessId');
+
+      console.log(`reservations: ${reservations}`);
 
       return reservations.map(r => ({
         id: r._id.toString(),
         date: moment.utc(r.date).format('YYYY-MM-DD'),
         heure: r.time,
-        restaurant: r.businessId ? (r.businessId as any).name : 'N/A',
+        restaurant: r.businessId,
         personnes: r.partySize,
         statut: r.status.toUpperCase(),
       }));
@@ -174,7 +177,7 @@ export const dashboardResolvers = {
         statut: updatedReservation.status.toUpperCase(),
       };
     },
-    
+
     cancelReservation: async (_, { id }) => {
       const cancelledReservation = await ReservationModel.findByIdAndUpdate(id, { status: 'cancelled' }, { new: true }).populate('businessId');
       if (!cancelledReservation) throw new GraphQLError('Reservation not found.');
@@ -187,6 +190,16 @@ export const dashboardResolvers = {
         personnes: cancelledReservation.partySize,
         statut: cancelledReservation.status.toUpperCase(),
       };
+    }
+  },
+  ReservationInfo: {
+    restaurant: async ({ restaurant }, _, { Loaders }) => {
+      try {
+        return await restaurant ? Loaders.restaurant.load(restaurant) : null;
+      }
+      catch (error) {
+        throw error;
+      }
     }
   }
 };

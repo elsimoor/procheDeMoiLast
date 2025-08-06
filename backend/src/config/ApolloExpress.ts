@@ -13,6 +13,7 @@ import {
   BatchTable,
   BatchService,
   BatchUStaff,
+  BatchRestaurant
 } from "../middlewares";
 
 
@@ -54,6 +55,7 @@ const startServer = async (app: Application) => {
           table: new DataLoader((keys) => BatchTable(keys)),
           service: new DataLoader((keys) => BatchService(keys)),
           staff: new DataLoader((keys) => BatchUStaff(keys)),
+          restaurant: new DataLoader((keys) => BatchRestaurant(keys)),
         },
         //@ts-ignore
         req,

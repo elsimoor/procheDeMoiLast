@@ -53,7 +53,10 @@ const GET_RESERVATIONS_BY_DATE = gql`
       id
       date
       heure
-      restaurant
+      restaurant{
+        id
+        name
+      }
       personnes
       statut
     }
@@ -287,7 +290,7 @@ export default function RestaurantOverviewPage() {
                   <TableRow key={res.id}>
                     <TableCell className="font-medium">{moment.utc(res.date).format("DD/MM/YYYY")}</TableCell>
                     <TableCell>{res.heure}</TableCell>
-                    <TableCell>{res.restaurant}</TableCell>
+                    <TableCell>{res.restaurant?.name}</TableCell>
                     <TableCell>{res.personnes}</TableCell>
                     <TableCell className="text-center"><StatusPill status={res.statut} /></TableCell>
                     <TableCell className="text-right space-x-2">

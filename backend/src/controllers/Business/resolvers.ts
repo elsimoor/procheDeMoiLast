@@ -211,7 +211,7 @@ export const businessResolvers = {
       }
       const reservation = new ReservationModel({
         ...reservationData,
-        businessId: restaurant.clientId,
+        businessId: restaurant._id,
         businessType: "restaurant",
         partySize: input.personnes,
         time: input.heure,
@@ -232,7 +232,7 @@ export const businessResolvers = {
       }
       const reservation = new ReservationModel({
         ...privatisationData,
-        businessId: restaurant.clientId,
+        businessId: restaurant._id,
         businessType: "restaurant",
         partySize: input.personnes,
         time: input.heure,

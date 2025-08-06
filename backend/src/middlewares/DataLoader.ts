@@ -8,6 +8,7 @@ import StaffModel from "../models/StaffModel";
 import ClientModel from "../models/ClientModel";
 import TableModel from "../models/TableModel";
 import UserModel from "../models/UserModel";
+import RestaurantModel from "../models/RestaurantModel";
 
 
 
@@ -55,6 +56,13 @@ const BatchUStaff = async (ids: any) => {
 };
 
 
+const BatchRestaurant = async (ids: any) => {
+  // Implement your logic to batch load restaurants
+  const restaurants = await RestaurantModel.find({ _id: { $in: ids }});
+  return ids.map((id: any) => restaurants.find((restaurant: any) => restaurant && restaurant.id == id));
+}
+
+
 
 
 export {
@@ -64,4 +72,5 @@ export {
   BatchTable,
   BatchService,
   BatchUStaff,
+  BatchRestaurant
 };

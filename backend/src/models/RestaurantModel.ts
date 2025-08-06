@@ -61,7 +61,7 @@ const restaurantSchema = new Schema<RestaurantDocument>({
   clientId: {
     type: Schema.Types.ObjectId,
     ref: 'Client',
-    required: true,
+    // required: true,
   },
   name: {
     type: String,

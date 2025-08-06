@@ -15,11 +15,11 @@ export const dashboardTypeDef = gql`
 
   type ReservationInfo {
     id: ID!
-    date: String!
-    heure: String!
-    restaurant: String!
-    personnes: Int!
-    statut: String!
+    date: String
+    heure: String
+    restaurant: Restaurant
+    personnes: Int
+    statut: String
   }
 
   type AvailabilitySlot {
@@ -30,7 +30,7 @@ export const dashboardTypeDef = gql`
   extend type Query {
     dashboardMetrics(restaurantId: ID!, from: String, to: String): DashboardMetrics
     dashboardCalendar(restaurantId: ID!, month: String!): [CalendarDayHeat!]
-    reservationsByDate(restaurantId: ID!, date: String!): [ReservationInfo!]
+    reservationsByDate(restaurantId: ID!, date: String!): [ReservationInfo]
     availability(restaurantId: ID!, date: String!, partySize: Int!): [AvailabilitySlot!]!
   }
 
