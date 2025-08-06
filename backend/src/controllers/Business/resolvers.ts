@@ -16,7 +16,17 @@ interface IdArg {
 type CreateHotelInput = any;      // replace `any` with your actual input shape
 type UpdateHotelInput = any;
 type CreateRestaurantInput = any;
-type UpdateRestaurantInput = any;
+interface UpdateRestaurantInput {
+  name?: string;
+  description?: string;
+  settings?: {
+    horaires?: { ouverture: string; fermeture: string }[];
+    capaciteTotale?: number;
+    tables?: { '2'?: number; '4'?: number; '6'?: number; '8'?: number };
+    frequenceCreneauxMinutes?: number;
+    maxReservationsParCreneau?: number;
+  };
+}
 type CreateSalonInput = any;
 type UpdateSalonInput = any;
 
@@ -92,6 +102,11 @@ export const businessResolvers = {
       { id, input }: MutationUpdateArgs<UpdateRestaurantInput>,
       _ctx: Context
     ) => {
+      if (input.settings && input.settings.tables) {
+        const tables = input.settings.tables;
+        const capaciteTheorique = (tables['2'] || 0) * 2 + (tables['4'] || 0) * 4 + (tables['6'] || 0) * 6 + (tables['8'] || 0) * 8;
+        input.settings['capaciteTheorique'] = capaciteTheorique;
+      }
       return RestaurantModel.findByIdAndUpdate(id, input, { new: true });
     },
 
