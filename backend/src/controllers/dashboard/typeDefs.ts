@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-express';
 
 export const dashboardTypeDef = gql`
-  scalar Date
 
   type DashboardMetrics {
     reservationsTotales: Int!

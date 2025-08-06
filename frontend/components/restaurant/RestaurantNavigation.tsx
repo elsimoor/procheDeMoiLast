@@ -59,6 +59,7 @@ export default function RestaurantNavigation({ setSidebarOpen }: { setSidebarOpe
             </button>
             <nav className="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
                 <a href="/restaurant/dashboard" className="hover:text-red-600 transition-colors">Dashboard</a>
+                <a href="/restaurant/dashboard/overview" className="hover:text-red-600 transition-colors">overview</a>
                 <a href="/restaurant/dashboard/reservations" className="hover:text-red-600 transition-colors">Reservations</a>
                 <a href="/restaurant/dashboard/tables" className="hover:text-red-600 transition-colors">Tables</a>
                 <a href="/restaurant/dashboard/menus" className="hover:text-red-600 transition-colors">Menus</a>

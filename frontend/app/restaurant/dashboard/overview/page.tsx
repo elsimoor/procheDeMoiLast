@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
@@ -232,15 +232,15 @@ export default function RestaurantOverviewPage() {
             <CardTitle className="text-sm font-medium text-gray-500">Chiffre d’affaires généré</CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? <Skeleton className="h-10 w-32" /> : <p className="text-4xl font-bold text-gray-800">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(metrics?.chiffreAffaires ?? 0)}</p>}
+            {metricsLoading ? <Skeleton className="h-10 w-32" /> : <p className="text-4xl font-bold text-gray-800">{new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(metrics?.chiffreAffaires ?? 0)}</p>}
           </CardContent>
         </Card>
         <Card className="bg-gray-50 shadow-sm rounded-xl border-none">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Taux de remplissage</CardTitle>
-          </Header>
+          </CardHeader>
           <CardContent>
-            {loading ? <Skeleton className="h-10 w-24" /> : <p className="text-4xl font-bold text-gray-800">{((metrics?.tauxRemplissage ?? 0) * 100).toFixed(0)}%</p>}
+            {metricsLoading ? <Skeleton className="h-10 w-24" /> : <p className="text-4xl font-bold text-gray-800">{((metrics?.tauxRemplissage ?? 0) * 100).toFixed(0)}%</p>}
           </CardContent>
         </Card>
       </section>
