@@ -113,10 +113,10 @@ export const businessTypeDef = gql`
   }
 
   type Tables {
-    "2": Int
-    "4": Int
-    "6": Int
-    "8": Int
+    size2: Int
+    size4: Int
+    size6: Int
+    size8: Int
   }
 
   input RestaurantSettingsInput {
@@ -140,10 +140,10 @@ export const businessTypeDef = gql`
   }
 
   input TablesInput {
-    "2": Int
-    "4": Int
-    "6": Int
-    "8": Int
+    size2: Int
+    size4: Int
+    size6: Int
+    size8: Int
   }
 
   type SalonSettings {
