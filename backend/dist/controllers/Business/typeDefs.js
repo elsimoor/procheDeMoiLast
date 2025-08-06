@@ -1,14 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.businessTypeDef = void 0;
-// business.schema.ts
 const apollo_server_express_1 = require("apollo-server-express");
 exports.businessTypeDef = (0, apollo_server_express_1.gql) `
 
-  """
-  OpeningPeriod defines a continuous date range during which a hotel
-  accepts reservations.  Both startDate and endDate are inclusive.
-  """
   type OpeningPeriod {
     startDate: Date!
     endDate: Date!
@@ -29,7 +24,6 @@ exports.businessTypeDef = (0, apollo_server_express_1.gql) `
     isActive: Boolean!
     createdAt: Date!
     updatedAt: Date!
-
     # Opening periods during which reservations are allowed
     openingPeriods: [OpeningPeriod!]
   }
@@ -101,6 +95,51 @@ exports.businessTypeDef = (0, apollo_server_express_1.gql) `
     maxPartySize: Int
     reservationWindow: Int
     cancellationHours: Int
+    horaires: [Horaire!]
+    capaciteTotale: Int
+    tables: Tables
+    frequenceCreneauxMinutes: Int
+    maxReservationsParCreneau: Int
+    capaciteTheorique: Int
+  }
+
+  type Horaire {
+    ouverture: String
+    fermeture: String
+  }
+
+  type Tables {
+    size2: Int
+    size4: Int
+    size6: Int
+    size8: Int
+  }
+
+  input RestaurantSettingsInput {
+    currency: String
+    timezone: String
+    taxRate: Float
+    serviceFee: Float
+    maxPartySize: Int
+    reservationWindow: Int
+    cancellationHours: Int
+    horaires: [HoraireInput!]
+    capaciteTotale: Int
+    tables: TablesInput
+    frequenceCreneauxMinutes: Int
+    maxReservationsParCreneau: Int
+  }
+
+  input HoraireInput {
+    ouverture: String
+    fermeture: String
+  }
+
+  input TablesInput {
+    size2: Int
+    size4: Int
+    size6: Int
+    size8: Int
   }
 
   type SalonSettings {
@@ -123,6 +162,7 @@ exports.businessTypeDef = (0, apollo_server_express_1.gql) `
     description: String
     included: Boolean!
     category: String
+    price: Float
   }
 
   type BusinessService {
@@ -142,6 +182,39 @@ exports.businessTypeDef = (0, apollo_server_express_1.gql) `
   type Rating {
     average: Float!
     count: Int!
+  }
+
+  extend type Mutation {
+    updateRestaurant(id: ID!, input: UpdateRestaurantInput!): Restaurant
+    createReservationV2(input: CreateReservationV2Input!): Reservation!
+    createPrivatisationV2(input: CreatePrivatisationV2Input!): Reservation!
+  }
+
+  input UpdateRestaurantInput {
+    name: String
+    description: String
+    address: AddressInput
+    contact: ContactInput
+    settings: RestaurantSettingsInput
+    cuisine: [String!]
+    priceRange: String
+    features: [String!]
+    images: [String!]
+    isActive: Boolean
+  }
+
+  input AddressInput {
+    street: String
+    city: String
+    state: String
+    zipCode: String
+    country: String
+  }
+
+  input ContactInput {
+    phone: String
+    email: String
+    website: String
   }
 `;
 //# sourceMappingURL=typeDefs.js.map

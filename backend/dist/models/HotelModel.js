@@ -55,7 +55,8 @@ const hotelSchema = new mongoose_1.Schema({
             name: String,
             description: String,
             included: { type: Boolean, default: true },
-            category: String
+            category: String,
+            price: { type: Number, default: 0 }
         }],
     services: [{
             name: String,

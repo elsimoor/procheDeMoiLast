@@ -87,6 +87,65 @@ export const dashboardResolvers = {
         personnes: r.partySize,
         statut: r.status.toUpperCase(),
       }));
+    },
+    availability: async (_, { restaurantId, date, partySize }) => {
+      const restaurant = await RestaurantModel.findById(restaurantId).lean();
+      if (!restaurant) {
+        throw new GraphQLError('Restaurant not found.');
+      }
+
+      const settings = restaurant.settings;
+      if (!settings || !settings.horaires || !settings.frequenceCreneauxMinutes) {
+        throw new GraphQLError('Restaurant settings for availability are incomplete.');
+      }
+
+      // 1. Generate all possible slots for the day
+      const allSlots = [];
+      settings.horaires.forEach(h => {
+        if (!h.ouverture || !h.fermeture) return;
+
+        let current = moment.utc(`${date}T${h.ouverture}`);
+        const end = moment.utc(`${date}T${h.fermeture}`);
+
+        while (current.isBefore(end)) {
+          allSlots.push(current.format('HH:mm'));
+          current.add(settings.frequenceCreneauxMinutes, 'minutes');
+        }
+      });
+
+      // 2. Get all confirmed reservations for the day
+      const startOfDay = moment.utc(date).startOf('day').toDate();
+      const endOfDay = moment.utc(date).endOf('day').toDate();
+
+      const reservations = await ReservationModel.find({
+        businessId: restaurantId,
+        businessType: 'restaurant',
+        date: { $gte: startOfDay, $lt: endOfDay },
+        status: { $in: ['confirmed', 'pending'] } // Consider pending as well
+      }).select('time partySize');
+
+      // 3. Calculate bookings per slot
+      const bookingsBySlot = reservations.reduce((acc, r) => {
+        if (r.time) {
+          acc[r.time] = (acc[r.time] || 0) + (r.partySize || 0);
+        }
+        return acc;
+      }, {});
+
+      // 4. Determine availability for each slot
+      // Effective capacity per slot is the minimum of total capacity and max reservations per slot
+      const capaciteEffective = Math.min(
+        settings.capaciteTotale || Infinity,
+        settings.maxReservationsParCreneau || Infinity
+      );
+
+      const availabilitySlots = allSlots.map(slot => {
+        const currentBookings = bookingsBySlot[slot] || 0;
+        const available = (currentBookings + partySize) <= capaciteEffective;
+        return { time: slot, available };
+      });
+
+      return availabilitySlots;
     }
   },
   Mutation: {

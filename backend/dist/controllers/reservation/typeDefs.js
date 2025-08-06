@@ -52,5 +52,28 @@ exports.reservationTypeDef = (0, apollo_server_express_1.gql) `
     email: String!
     phone: String!
   }
+
+  input CreateReservationV2Input {
+    date: String!
+    heure: String!
+    personnes: Int!
+    emplacement: String
+    source: String!
+    restaurantId: ID!
+    customerInfo: CustomerInfoInput!
+  }
+
+  input CreatePrivatisationV2Input {
+    date: String!
+    heure: String!
+    dureeHeures: Int!
+    type: String!
+    menu: String!
+    espace: String!
+    personnes: Int!
+    source: String!
+    restaurantId: ID!
+    customerInfo: CustomerInfoInput!
+  }
 `;
 //# sourceMappingURL=typeDefs.js.map

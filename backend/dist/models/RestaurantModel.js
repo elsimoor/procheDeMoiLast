@@ -50,7 +50,21 @@ const restaurantSchema = new mongoose_1.Schema({
         serviceFee: { type: Number, default: 0 },
         maxPartySize: { type: Number, default: 10 },
         reservationWindow: { type: Number, default: 60 },
-        cancellationHours: { type: Number, default: 2 }
+        cancellationHours: { type: Number, default: 2 },
+        horaires: [{
+                ouverture: String,
+                fermeture: String
+            }],
+        capaciteTotale: { type: Number, default: 0 },
+        tables: {
+            size2: { type: Number, default: 0 },
+            size4: { type: Number, default: 0 },
+            size6: { type: Number, default: 0 },
+            size8: { type: Number, default: 0 }
+        },
+        frequenceCreneauxMinutes: { type: Number, default: 30 },
+        maxReservationsParCreneau: { type: Number, default: 10 },
+        capaciteTheorique: { type: Number, default: 0 }
     },
     businessHours: [{
             day: {

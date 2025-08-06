@@ -24,44 +24,42 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const tableSchema = new mongoose_1.Schema({
+// Schema definition
+const privatisationOptionSchema = new mongoose_1.Schema({
+    nom: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    description: {
+        type: String,
+        trim: true
+    },
+    type: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    capaciteMaximale: {
+        type: Number,
+        required: true
+    },
+    dureeMaximaleHeures: {
+        type: Number,
+        required: true
+    },
+    menusDeGroupe: {
+        type: [String],
+        default: []
+    },
     restaurantId: {
-        type: mongoose_1.Schema.Types.ObjectId,
+        type: mongoose_1.default.Schema.Types.ObjectId,
         ref: 'Restaurant',
         required: true
-    },
-    number: {
-        type: Number,
-        required: true
-    },
-    capacity: {
-        type: Number,
-        required: true
-    },
-    location: {
-        type: String,
-        // enum: ['Main Dining', 'Patio', 'Bar Area', 'Private Room'],
-        default: 'Main Dining'
-    },
-    status: {
-        type: String,
-        enum: ['available', 'occupied', 'reserved', 'cleaning'],
-        default: 'available'
-    },
-    features: [String],
-    position: {
-        x: Number,
-        y: Number
-    },
-    images: [String],
-    isActive: {
-        type: Boolean,
-        default: true
     }
 }, {
     timestamps: true
 });
-// Compound index for restaurant and table number uniqueness
-tableSchema.index({ restaurantId: 1, number: 1 }, { unique: true });
-exports.default = mongoose_1.default.model('Table', tableSchema);
-//# sourceMappingURL=TableModel.js.map
+// Model export
+exports.default = mongoose_1.default.model('PrivatisationOption', privatisationOptionSchema);
+//# sourceMappingURL=PrivatisationOptionModel.js.map

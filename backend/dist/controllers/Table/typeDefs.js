@@ -20,6 +20,7 @@ exports.tableTypeDefs = (0, apollo_server_express_1.gql) `
     features: [String!]!
     position: Position
     isActive: Boolean!
+    images: [String]
     createdAt: Date!
     updatedAt: Date!
   }
