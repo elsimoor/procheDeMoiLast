@@ -174,6 +174,7 @@ export const dashboardResolvers = {
         statut: updatedReservation.status.toUpperCase(),
       };
     },
+    
     cancelReservation: async (_, { id }) => {
       const cancelledReservation = await ReservationModel.findByIdAndUpdate(id, { status: 'cancelled' }, { new: true }).populate('businessId');
       if (!cancelledReservation) throw new GraphQLError('Reservation not found.');
