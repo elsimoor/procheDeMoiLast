@@ -25,8 +25,9 @@ export async function POST(request: Request) {
                 lastName
                 email
                 role
-                businessType
-                businessId
+                restaurantId
+                hotelId
+                salonId
               }
             }
           }
@@ -67,8 +68,8 @@ export async function POST(request: Request) {
       // Copy the business identifiers into top‑level session fields for easy
       // access throughout the app.  The backend returns businessType and
       // businessId on the user object.
-      session.businessType = result.data.login.user.businessType;
-      session.businessId = result.data.login.user.businessId;
+      session.businessType = result.data.login.user.restaurantId ? 'restaurant' : result.data.login.user.hotelId ? 'hotel' : 'salon';
+      session.businessId = result.data.login.user.restaurantId || result.data.login.user.hotelId || result.data.login.user.salonId;
 
       await session.save();
       // session.user = {

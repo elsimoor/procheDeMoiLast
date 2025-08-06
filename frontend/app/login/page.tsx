@@ -48,11 +48,12 @@ export default function LoginPage() {
       const data = await res.json()
       setIsLoading(false)
       if (res.ok && data.data?.login?.token) {
-        if (data.data.login.user.businessType === "hotel") {
+        const user = data.data.login.user;
+        if (user.hotelId) {
           router.push("/hotel/dashboard")
-        } else if (data.data.login.user.businessType === "restaurant") {
+        } else if (user.restaurantId) {
           router.push("/restaurant/dashboard")
-        } else if (data.data.login.user.businessType === "salon") {
+        } else if (user.salonId) {
           router.push("/salon/dashboard")
         }
       } else {
