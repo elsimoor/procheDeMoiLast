@@ -1,43 +1,61 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { gql, useQuery } from "@apollo/client";
+import { Suspense } from "react";
 
-export default function AccueilPage() {
+const GET_RESTAURANTS = gql`
+  query GetRestaurants {
+    restaurants {
+      id
+      name
+      description
+      images
+    }
+  }
+`;
+
+function AccueilContent() {
+  const { loading, error, data } = useQuery(GET_RESTAURANTS);
+
+  if (loading) return <div className="flex h-screen items-center justify-center">Loading restaurants...</div>;
+  if (error) return <div className="flex h-screen items-center justify-center">Error: {error.message}</div>;
+
   return (
-    <div className="relative w-full h-screen bg-gray-900">
-      {/* Background Image with Overlay */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('/placeholder.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-50" />
-      </div>
-
-      {/* Top Right Buttons */}
-      <div className="absolute top-6 right-6 z-10 flex items-center space-x-4">
-        <Button asChild variant="outline" className="border-red-500 text-white hover:bg-red-500 hover:text-white rounded-full px-6 py-2 transition-colors duration-300">
-          <Link href="/u/privatisation">Privatiser</Link>
-        </Button>
-        <Button asChild className="bg-red-600 hover:bg-red-700 text-white rounded-full px-6 py-2 transition-colors duration-300">
-          <Link href="/u/reserver">Réserver</Link>
-        </Button>
-      </div>
-
-      {/* Centered Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-        <div className="bg-black bg-opacity-30 p-10 rounded-2xl backdrop-blur-sm">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-            Découvrez une Expérience Culinaire Inoubliable
-          </h1>
-          <p className="mt-6 text-lg md:text-xl max-w-3xl mx-auto text-gray-200">
-            Savourez des plats exquis préparés avec passion par nos chefs de renommée mondiale. Une ambiance élégante et un service impeccable vous attendent pour rendre chaque visite mémorable.
-          </p>
-          <div className="mt-10">
-            <Button asChild size="lg" className="bg-red-600 hover:bg-red-700 text-white rounded-full px-16 py-8 text-2xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-transform duration-300">
-              <Link href="/u/reserver">Réserver</Link>
-            </Button>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-5xl font-extrabold text-center mb-12 text-gray-800">Choisissez un restaurant</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {data.restaurants.map((restaurant: any) => (
+            <Card key={restaurant.id} className="overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
+              <img src={restaurant.images[0] || '/placeholder.jpg'} alt={restaurant.name} className="w-full h-56 object-cover" />
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">{restaurant.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-6 h-20 overflow-hidden">{restaurant.description}</p>
+              </CardContent>
+              <CardFooter className="bg-gray-50 p-4">
+                <Button asChild className="w-full bg-red-600 hover:bg-red-700 text-white rounded-full py-6 text-lg font-semibold">
+                  <Link href={`/u/reserver?restaurantId=${restaurant.id}`}>
+                    Réserver une table
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       </div>
     </div>
   );
+}
+
+export default function AccueilPage() {
+    return (
+        <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+            <AccueilContent />
+        </Suspense>
+    )
 }

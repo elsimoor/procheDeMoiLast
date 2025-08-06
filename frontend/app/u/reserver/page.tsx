@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { gql, useLazyQuery } from "@apollo/client";
 import { toast } from "sonner";
 import moment from "moment";
@@ -20,7 +22,7 @@ const GET_AVAILABILITY = gql`
   }
 `;
 
-export default function ReserverPage() {
+function ReserverContent() {
   const [personnes, setPersonnes] = useState(2);
   const [emplacement, setEmplacement] = useState("");
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -28,9 +30,8 @@ export default function ReserverPage() {
   const [availableSlots, setAvailableSlots] = useState<{time: string, available: boolean}[]>([]);
 
   const router = useRouter();
-
-  // Replace with actual restaurant ID logic
-  const restaurantId = "66b3e6e58d389964b73b7553";
+  const searchParams = useSearchParams();
+  const restaurantId = searchParams.get('restaurantId');
 
   const [loadAvailability, { loading, error, data }] = useLazyQuery(GET_AVAILABILITY, {
     onCompleted: (data) => {
@@ -59,6 +60,7 @@ export default function ReserverPage() {
     if (!isFormValid) return;
 
     const params = new URLSearchParams({
+      restaurantId: restaurantId,
       date: date.toISOString().split("T")[0],
       heure,
       personnes: personnes.toString(),
@@ -156,4 +158,12 @@ export default function ReserverPage() {
       </div>
     </div>
   );
+}
+
+export default function ReserverPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ReserverContent />
+        </Suspense>
+    )
 }

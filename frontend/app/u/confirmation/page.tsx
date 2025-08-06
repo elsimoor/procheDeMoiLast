@@ -28,8 +28,7 @@ function ConfirmationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Replace with actual restaurant ID and customer info logic
-  const restaurantId = "66b3e6e58d389964b73b7553";
+  const restaurantId = searchParams.get('restaurantId');
   const customerInfo = { name: "Guest User", email: "guest@example.com", phone: "0000000000" };
 
   // Details from URL
