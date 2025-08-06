@@ -1,7 +1,7 @@
-// business.schema.ts
 import { gql } from 'apollo-server-express';
 
 export const businessTypeDef = gql`
+  scalar Date
 
   type OpeningPeriod {
     startDate: Date!
@@ -23,7 +23,6 @@ export const businessTypeDef = gql`
     isActive: Boolean!
     createdAt: Date!
     updatedAt: Date!
-
     # Opening periods during which reservations are allowed
     openingPeriods: [OpeningPeriod!]
   }
@@ -109,10 +108,10 @@ export const businessTypeDef = gql`
   }
 
   type Tables {
-    "2": Int
-    "4": Int
-    "6": Int
-    "8": Int
+    seats2: Int
+    seats4: Int
+    seats6: Int
+    seats8: Int
   }
 
   input RestaurantSettingsInput {
@@ -136,10 +135,10 @@ export const businessTypeDef = gql`
   }
 
   input TablesInput {
-    "2": Int
-    "4": Int
-    "6": Int
-    "8": Int
+    seats2: Int
+    seats4: Int
+    seats6: Int
+    seats8: Int
   }
 
   type SalonSettings {
