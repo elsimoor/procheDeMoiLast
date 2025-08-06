@@ -6,15 +6,20 @@ import { UploadCloud, X } from "lucide-react";
 interface ImageUploadProps {
   onUpload: (files: File[]) => Promise<void>;
   uploading: boolean;
+  multiple?: boolean;
 }
 
-export function ImageUpload({ onUpload, uploading }: ImageUploadProps) {
+export function ImageUpload({ onUpload, uploading, multiple = false }: ImageUploadProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+      if (multiple) {
+        setFiles((prevFiles) => [...prevFiles, ...Array.from(e.target.files)]);
+      } else {
+        setFiles(Array.from(e.target.files));
+      }
     }
   };
 
@@ -23,7 +28,11 @@ export function ImageUpload({ onUpload, uploading }: ImageUploadProps) {
     e.stopPropagation();
     setIsDragging(false);
     if (e.dataTransfer.files) {
-      setFiles(Array.from(e.dataTransfer.files));
+      if (multiple) {
+        setFiles((prevFiles) => [...prevFiles, ...Array.from(e.dataTransfer.files)]);
+      } else {
+        setFiles(Array.from(e.dataTransfer.files));
+      }
     }
   };
 
@@ -72,7 +81,7 @@ export function ImageUpload({ onUpload, uploading }: ImageUploadProps) {
             browse
             <input
               type="file"
-              multiple
+              multiple={multiple}
               className="hidden"
               onChange={handleFileChange}
             />
@@ -107,18 +116,18 @@ export function ImageUpload({ onUpload, uploading }: ImageUploadProps) {
               </li>
             ))}
           </ul>
-          <button
-            type="button"
-            onClick={handleUploadClick}
-            disabled={uploading}
-            className={`w-full px-4 py-2 rounded text-white ${
-              uploading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            {uploading ? "Uploading..." : `Upload ${files.length} file(s)`}
-          </button>
         </div>
       )}
+      <button
+        type="button"
+        onClick={handleUploadClick}
+        disabled={uploading || files.length === 0}
+        className={`w-full px-4 py-2 rounded text-white ${
+          uploading || files.length === 0 ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+        }`}
+      >
+        {uploading ? "Uploading..." : `Upload ${files.length} file(s)`}
+      </button>
     </div>
   );
 }
