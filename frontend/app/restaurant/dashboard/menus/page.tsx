@@ -784,8 +784,8 @@ export default function RestaurantMenus() {
   const [updateMenuItem] = useMutation(UPDATE_MENU_ITEM)
   const [deleteMenuItem] = useMutation(DELETE_MENU_ITEM)
 
-  // Form state
-  const [formData, setFormData] = useState<Partial<MenuItem & { image?: string }>>({
+  // Local form state
+  const [formData, setFormData] = useState<Partial<MenuItem>>({
     name: "",
     description: "",
     price: 0,
@@ -794,7 +794,7 @@ export default function RestaurantMenus() {
     popular: false,
     prepTime: 10,
     allergens: [],
-    image: "",
+    images: [],
   })
 
   // Categories
@@ -850,7 +850,7 @@ export default function RestaurantMenus() {
               spiceLevel: "mild",
               ingredients: [],
               nutritionalInfo: null,
-              images: formData.image ? [formData.image] : [],
+              images: formData.images,
             },
           },
         })
@@ -871,7 +871,7 @@ export default function RestaurantMenus() {
               spiceLevel: "mild",
               ingredients: [],
               nutritionalInfo: null,
-              images: formData.image ? [formData.image] : [],
+              images: formData.images,
             },
           },
         })
@@ -896,7 +896,7 @@ export default function RestaurantMenus() {
       popular: false,
       prepTime: 10,
       allergens: [],
-      image: "",
+      images: [],
     })
   }
 
@@ -911,7 +911,7 @@ export default function RestaurantMenus() {
       popular: item.popular,
       prepTime: item.prepTime || 10,
       allergens: item.allergens || [],
-      image: item.images?.length ? item.images[0] : "",
+      images: item.images || [],
     })
     setShowModal(true)
   }
@@ -931,7 +931,7 @@ export default function RestaurantMenus() {
     setUploading(true)
     try {
       const urls = await Promise.all(files.map(uploadImage))
-      setFormData({ ...formData, image: urls[0] })
+      setFormData({ ...formData, images: [...(formData.images || []), ...urls] })
     } catch (err) {
       console.error(err)
       alert("Failed to upload image")
@@ -1250,15 +1250,23 @@ export default function RestaurantMenus() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
-
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
-                  <ImageUpload onUpload={handleImageUpload} uploading={uploading} />
-                  {formData.image && (
-                    <div className="mt-4">
-                      <img src={formData.image} alt="Menu item image" className="w-32 h-32 object-cover rounded-lg" />
-                    </div>
-                  )}
+                  <ImageUpload onUpload={handleImageUpload} uploading={uploading} multiple />
+                  <div className="mt-4 flex flex-wrap gap-4">
+                    {formData.images?.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img src={image} alt="Menu item image" className="w-32 h-32 object-cover rounded-lg" />
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, images: formData.images?.filter((_, i) => i !== index) })}
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="md:col-span-2 flex items-center space-x-4">
