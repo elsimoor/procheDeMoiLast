@@ -8,7 +8,7 @@ export const root = gql`
     # Auth
 
     # Users
-    users(businessType: String, role: String): [User!]!
+    users(restaurantId: ID, hotelId: ID, salonId: ID, role: String): [User!]!
     user(id: ID!): User
 
     # Businesses
@@ -21,8 +21,9 @@ export const root = gql`
 
     # Reservations
     reservations(
-      businessId: ID!
-      businessType: String!
+      restaurantId: ID
+      hotelId: ID
+      salonId: ID
       status: String
       date: Date
     ): [Reservation!]!
@@ -38,16 +39,18 @@ export const root = gql`
 
     # Services
     services(
-      businessId: ID!
-      businessType: String!
+      restaurantId: ID
+      hotelId: ID
+      salonId: ID
       category: String
     ): [Service!]!
     service(id: ID!): Service
 
     # Staff
     staff(
-      businessId: ID!
-      businessType: String!
+      restaurantId: ID
+      hotelId: ID
+      salonId: ID
       role: String
     ): [Staff!]!
     staffMember(id: ID!): Staff
@@ -58,8 +61,9 @@ export const root = gql`
 
     # Guests
     guests(
-      businessId: ID!
-      businessType: String!
+      restaurantId: ID
+      hotelId: ID
+      salonId: ID
       status: String
     ): [Guest!]!
     guest(id: ID!): Guest

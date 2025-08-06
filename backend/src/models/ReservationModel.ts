@@ -1,16 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 interface ReservationDocument extends Document {
-  /** The owning client for this reservation */
-  businessId: mongoose.Types.ObjectId;
-  /**
-   * Type of reservation.  Historically this field referenced the
-   * underlying model (hotel/restaurant/salon).  It now indicates the
-   * module enabled on the client: `hotel` for room bookings, `restaurant`
-   * for table bookings and `salon` for service bookings.  This field is
-   * maintained for backwards compatibility.
-   */
-  businessType: 'hotel' | 'restaurant' | 'salon';
+  restaurantId?: mongoose.Types.ObjectId;
+  hotelId?: mongoose.Types.ObjectId;
+  salonId?: mongoose.Types.ObjectId;
   customerId?: mongoose.Types.ObjectId;
   customerInfo: {
     name: string;
@@ -38,18 +31,17 @@ interface ReservationDocument extends Document {
 }
 
 const reservationSchema = new Schema<ReservationDocument>({
-  businessId: {
+  restaurantId: {
     type: Schema.Types.ObjectId,
-    // Reference the Client model rather than Hotel.  While the original
-    // implementation assumed a hotel reservation, the businessId now
-    // always points to a Client (tenant) document.  Mongoose population
-    // using this ref will therefore load Client records.
-    ref: 'Client',
+    ref: 'Restaurant',
   },
-  businessType: {
-    type: String,
-    enum: ['hotel', 'restaurant', 'salon'],
-    
+  hotelId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Hotel',
+  },
+  salonId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Salon',
   },
   customerId: {
     type: Schema.Types.ObjectId,

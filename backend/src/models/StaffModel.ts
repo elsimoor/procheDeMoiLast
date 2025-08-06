@@ -8,8 +8,9 @@ interface IAvailability {
 }
 
 interface IStaff extends Document {
-  businessId: mongoose.Types.ObjectId;
-  businessType: 'hotel' | 'restaurant' | 'salon';
+  restaurantId?: mongoose.Types.ObjectId;
+  hotelId?: mongoose.Types.ObjectId;
+  salonId?: mongoose.Types.ObjectId;
   userId?: mongoose.Types.ObjectId;
   name: string;
   role: string;
@@ -27,18 +28,17 @@ interface IStaff extends Document {
 }
 
 const staffSchema = new Schema<IStaff>({
-  businessId: {
+  restaurantId: {
     type: Schema.Types.ObjectId,
-    required: true,
-    // Associate a staff member with a client.  Previously this pointed
-    // at Hotel/Restaurant/Salon documents.  Now it references the Client
-    // entity for multi‑tenant support.
-    ref: 'Client',
+    ref: 'Restaurant',
   },
-  businessType: {
-    type: String,
-    enum: ['hotel', 'restaurant', 'salon'],
-    required: true
+  hotelId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Hotel',
+  },
+  salonId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Salon',
   },
   userId: {
     type: Schema.Types.ObjectId,

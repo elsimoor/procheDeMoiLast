@@ -8,8 +8,9 @@ import HotelModel from '../../models/HotelModel';
 // }
 
 interface ReservationsArgs {
-  businessId: string;
-  businessType: string;
+  restaurantId?: string;
+  hotelId?: string;
+  salonId?: string;
   status?: string;
   date?: string;
 }
@@ -32,9 +33,12 @@ export const reservationResolvers = {
   Query: {
     reservations: async (
       _parent,
-      { businessId, businessType, status, date }: ReservationsArgs
+      { restaurantId, hotelId, salonId, status, date }: ReservationsArgs
     ) => {
-      const filter: Record<string, any> = { businessId, businessType };
+      const filter: Record<string, any> = {};
+      if (restaurantId) filter.restaurantId = restaurantId;
+      if (hotelId) filter.hotelId = hotelId;
+      if (salonId) filter.salonId = salonId;
       if (status) filter.status = status;
       if (date) {
         const startDate = new Date(date);
@@ -60,8 +64,8 @@ export const reservationResolvers = {
       
     ) => {
       // If the reservation is for a hotel, validate against opening periods
-      if (input.businessType && input.businessType.toLowerCase() === 'hotel') {
-        const hotel = await HotelModel.findById(input.businessId);
+      if (input.hotelId) {
+        const hotel = await HotelModel.findById(input.hotelId);
         if (hotel && hotel.openingPeriods && hotel.openingPeriods.length > 0) {
           // Determine reservation start and end dates.  We support two patterns:
           // 1) Hotel reservations with checkIn and checkOut
@@ -116,8 +120,13 @@ export const reservationResolvers = {
      * DataLoader which fetches the associated Client document.  Returns
      * `null` if no client is associated with the reservation.
      */
-    client: async ({ businessId }, _args, { Loaders }) => {
-      return businessId ? await Loaders.business.load(businessId) : null;
+    client: async ({ restaurantId, hotelId, salonId }, _args, { Loaders }) => {
+      const businessId = restaurantId || hotelId || salonId;
+      if (!businessId) return null;
+      // This assumes the 'business' loader can fetch any business type
+      // and that the returned business document has a clientId.
+      const business = await Loaders.business.load(businessId);
+      return business ? await Loaders.client.load(business.clientId) : null;
     },
     customerId: async ({ customerId }, _, { Loaders }) => {
       return (await customerId) ? await Loaders.user.load(customerId) : null;

@@ -14,10 +14,13 @@ export const staffResolvers = {
   Query: {
     staff: async (
       _: any,
-      { businessId, businessType, role }: { businessId: string; businessType: string; role?: string },
+      { restaurantId, hotelId, salonId, role }: { restaurantId?: string; hotelId?: string; salonId?: string; role?: string },
       _ctx: Context
     ) => {
-      const filter: any = { businessId, businessType, isActive: true };
+      const filter: any = { isActive: true };
+      if (restaurantId) filter.restaurantId = restaurantId;
+      if (hotelId) filter.hotelId = hotelId;
+      if (salonId) filter.salonId = salonId;
       if (role) {
         filter.role = new RegExp(role, 'i');
       }

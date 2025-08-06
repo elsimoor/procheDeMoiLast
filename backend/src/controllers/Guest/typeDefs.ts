@@ -5,8 +5,9 @@ export const guestTypeDef = gql`
 
   type Guest {
     id: ID!
-    businessId: ID!
-    businessType: String!
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     userId: ID
     name: String!
     email: String!

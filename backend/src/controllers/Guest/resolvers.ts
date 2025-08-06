@@ -8,8 +8,9 @@ interface Context {
 }
 
 interface GuestsArgs {
-  businessId: string;
-  businessType: string;
+  restaurantId?: string;
+  hotelId?: string;
+  salonId?: string;
   status?: string;
 }
 
@@ -33,9 +34,12 @@ export const guestResolvers = {
   Query: {
     guests: async (
       _parent,
-      { businessId, businessType, status }: GuestsArgs
+      { restaurantId, hotelId, salonId, status }: GuestsArgs
     ): Promise<any[]> => {
-      const filter: Record<string, any> = { businessId, businessType };
+      const filter: Record<string, any> = {};
+      if (restaurantId) filter.restaurantId = restaurantId;
+      if (hotelId) filter.hotelId = hotelId;
+      if (salonId) filter.salonId = salonId;
       if (status) filter.status = status;
       return GuestModel.find(filter).sort({ name: 1 });
     },

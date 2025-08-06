@@ -7,8 +7,9 @@ interface IUser extends Document {
   email: string;
   password: string;
   role: 'admin' | 'manager' | 'staff' | 'customer';
-  businessType?: 'hotel' | 'restaurant' | 'salon';
-  businessId?: mongoose.Types.ObjectId;
+  restaurantId?: mongoose.Types.ObjectId;
+  hotelId?: mongoose.Types.ObjectId;
+  salonId?: mongoose.Types.ObjectId;
   avatar?: string;
   phone?: string;
   isActive: boolean;
@@ -49,16 +50,17 @@ const userSchema = new Schema<IUser>({
     enum: ['admin', 'manager', 'staff', 'customer'],
     default: 'customer'
   },
-  businessType: {
-    type: String,
-    enum: ['hotel', 'restaurant', 'salon'],
-    required: function() {
-      return this.role !== 'customer';
-    }
-  },
-  businessId: {
+  restaurantId: {
     type: Schema.Types.ObjectId,
-    refPath: 'businessType'
+    ref: 'Restaurant',
+  },
+  hotelId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Hotel',
+  },
+  salonId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Salon',
   },
   avatar: String,
   phone: String,

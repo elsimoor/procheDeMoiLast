@@ -43,8 +43,9 @@ interface CommunicationPreferences {
 /* ---------- main document interface ---------- */
 
 export interface GuestDocument extends Document {
-  businessId: Types.ObjectId;
-  businessType: 'hotel' | 'restaurant' | 'salon';
+  restaurantId?: Types.ObjectId;
+  hotelId?: Types.ObjectId;
+  salonId?: Types.ObjectId;
   userId?: Types.ObjectId;
 
   name: string;
@@ -79,16 +80,17 @@ export interface GuestDocument extends Document {
 
 const guestSchema = new Schema<GuestDocument>(
   {
-    businessId: {
+    restaurantId: {
       type: Schema.Types.ObjectId,
-      required: true,
-      // Always reference the owning Client rather than a specific business
-      ref: 'Client',
+      ref: 'Restaurant',
     },
-    businessType: {
-      type: String,
-      enum: ['hotel', 'restaurant', 'salon'],
-      required: true
+    hotelId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Hotel',
+    },
+    salonId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Salon',
     },
     userId: {
       type: Schema.Types.ObjectId,

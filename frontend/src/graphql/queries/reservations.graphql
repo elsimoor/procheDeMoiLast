@@ -6,19 +6,32 @@
 #     ): [Reservation!]!
 
 query reservations(
-  $businessId: ID!
-  $businessType: String!
+  $restaurantId: ID
+  $hotelId: ID
+  $salonId: ID
   $status: String
   $date: Date
 ) {
   reservations(
-    businessId: $businessId
-    businessType: $businessType
+    restaurantId: $restaurantId
+    hotelId: $hotelId
+    salonId: $salonId
     status: $status
     date: $date
   ) {
     id
-    businessType
+    restaurantId {
+      id
+      name
+    }
+    hotelId {
+      id
+      name
+    }
+    salonId {
+      id
+      name
+    }
     customerInfo {
       name
       email

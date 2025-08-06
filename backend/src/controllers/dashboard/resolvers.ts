@@ -15,8 +15,7 @@ export const dashboardResolvers = {
       const endDate = to ? moment(to) : moment().endOf('month');
 
       const reservations = await ReservationModel.find({
-        businessId: restaurant.clientId,
-        businessType: 'restaurant',
+        restaurantId: restaurantId,
         date: { $gte: startDate.toDate(), $lte: endDate.toDate() },
       });
 
@@ -56,8 +55,7 @@ export const dashboardResolvers = {
       const end = moment.utc(month).endOf('month').toDate();
 
       const reservations = await ReservationModel.find({
-        businessId: restaurant.clientId,
-        businessType: 'restaurant',
+        restaurantId: restaurantId,
         date: { $gte: start, $lte: end },
       }).select('date');
 
@@ -74,24 +72,19 @@ export const dashboardResolvers = {
     },
 
     reservationsByDate: async (_, { restaurantId, date }) => {
-      const restaurant = await RestaurantModel.findById(restaurantId);
-      if (!restaurant) {
-        throw new GraphQLError('Restaurant not found.');
-      }
       const targetDate = moment.utc(date).startOf('day').toDate();
       const nextDay = moment.utc(targetDate).add(1, 'days').toDate();
 
       const reservations = await ReservationModel.find({
-        businessId: restaurant.clientId,
-        businessType: 'restaurant',
+        restaurantId: restaurantId,
         date: { $gte: targetDate, $lt: nextDay },
-      }).populate('businessId');
+      }).populate('restaurantId');
 
       return reservations.map(r => ({
         id: r._id.toString(),
         date: moment.utc(r.date).format('YYYY-MM-DD'),
         heure: r.time,
-        restaurant: r.businessId ? (r.businessId as any).name : 'N/A',
+        restaurant: r.restaurantId ? (r.restaurantId as any).name : 'N/A',
         personnes: r.partySize,
         statut: r.status.toUpperCase(),
       }));
@@ -126,8 +119,7 @@ export const dashboardResolvers = {
       const endOfDay = moment.utc(date).endOf('day').toDate();
 
       const reservations = await ReservationModel.find({
-        businessId: restaurant.clientId,
-        businessType: 'restaurant',
+        restaurantId: restaurantId,
         date: { $gte: startOfDay, $lt: endOfDay },
         status: { $in: ['confirmed', 'pending'] } // Consider pending as well
       }).select('time partySize');

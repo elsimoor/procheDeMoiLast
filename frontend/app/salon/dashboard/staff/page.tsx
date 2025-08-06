@@ -38,8 +38,9 @@ interface Availability {
  */
 interface StaffMember {
   id: string
-  businessId: string
-  businessType: string
+  restaurantId?: string
+  hotelId?: string
+  salonId?: string
   userId?: string | null
   name: string
   role: string
@@ -65,8 +66,7 @@ export default function SalonStaff() {
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null)
 
   // Session state: determine which business (salon) is active
-  const [businessId, setBusinessId] = useState<string | null>(null)
-  const [businessType, setBusinessType] = useState<string | null>(null)
+  const [salonId, setSalonId] = useState<string | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
   const [sessionError, setSessionError] = useState<string | null>(null)
 
@@ -78,8 +78,7 @@ export default function SalonStaff() {
           throw new Error("Failed to fetch session")
         }
         const sess = await res.json()
-        setBusinessId(sess.businessId)
-        setBusinessType(sess.businessType)
+        setSalonId(sess.salonId)
       } catch (error) {
         setSessionError((error as Error).message)
       } finally {
@@ -91,11 +90,12 @@ export default function SalonStaff() {
 
   // GraphQL operations for staff management
   const GET_STAFF = gql`
-    query GetStaff($businessId: ID!, $businessType: String!) {
-      staff(businessId: $businessId, businessType: $businessType) {
+    query GetStaff($salonId: ID!) {
+      staff(salonId: $salonId) {
         id
-        businessId
-        businessType
+        restaurantId
+        hotelId
+        salonId
         name
         role
         email
@@ -177,8 +177,8 @@ export default function SalonStaff() {
     error: staffError,
     refetch: refetchStaff,
   } = useQuery(GET_STAFF, {
-    variables: { businessId, businessType },
-    skip: !businessId || !businessType,
+    variables: { salonId },
+    skip: !salonId,
   })
 
   // Mutation hooks for CRUD operations.  Refetch staff list on completion.
@@ -265,15 +265,14 @@ export default function SalonStaff() {
   // Form submission for creating or updating a staff member
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!businessId || !businessType) return
+    if (!salonId) return
     try {
       if (editingStaff) {
         await updateStaff({
           variables: {
             id: editingStaff.id,
             input: {
-              businessId,
-              businessType,
+              salonId,
               name: formData.name,
               role: formData.role,
               email: formData.email,
@@ -293,8 +292,7 @@ export default function SalonStaff() {
         await createStaff({
           variables: {
             input: {
-              businessId,
-              businessType,
+              salonId,
               name: formData.name,
               role: formData.role,
               email: formData.email,

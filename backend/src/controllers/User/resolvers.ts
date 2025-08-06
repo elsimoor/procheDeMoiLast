@@ -8,7 +8,9 @@ interface Context {
 }
 
 interface UsersArgs {
-  businessType?: string;
+  restaurantId?: string;
+  hotelId?: string;
+  salonId?: string;
   role?: string;
 }
 
@@ -21,7 +23,6 @@ interface RegisterInput {
   firstName: string;
   email: string;
   password: string;
-  businessType: string;
 }
 
 interface MutationRegisterArgs {
@@ -52,13 +53,15 @@ export const userResolvers = {
 
     users: async (
       _parent,
-      { businessType, role }: UsersArgs,
+      { restaurantId, hotelId, salonId, role }: UsersArgs,
       _ctx: Context
     ) => {
       // Do not enforce authentication for listing users.  If filters are
       // provided they will be applied; otherwise all users are returned.
       const filter: any = {};
-      if (businessType) filter.businessType = businessType;
+      if (restaurantId) filter.restaurantId = restaurantId;
+      if (hotelId) filter.hotelId = hotelId;
+      if (salonId) filter.salonId = salonId;
       if (role) filter.role = role;
       return UserModel.find(filter);
     },
@@ -78,7 +81,7 @@ export const userResolvers = {
       _parent,
       { input }: MutationRegisterArgs
     ) => {
-      const { lastName,firstName, email, password, businessType } = input;
+      const { lastName,firstName, email, password } = input;
 
       // Check if user already exists
       const existingUser = await UserModel.findOne({ email });
@@ -92,7 +95,6 @@ export const userResolvers = {
         firstName,
         email,
         password,
-        businessType,
         role: 'admin' // First user of a business is admin
       });
 
@@ -143,7 +145,7 @@ export const userResolvers = {
      */
     updateUser: async (
       _parent,
-      { id, input }: { id: string; input: { businessId?: string; businessType?: string; role?: string } },
+      { id, input }: { id: string; input: { restaurantId?: string; hotelId?: string; salonId?: string; role?: string } },
       _ctx: Context
     ) => {
       // Allow updating a user without requiring authentication.  This

@@ -15,8 +15,8 @@ const GET_SALONS = gql`
 `
 
 const GET_SERVICES = gql`
-    query GetServices($businessId: ID!, $businessType: String!) {
-        services(businessId: $businessId, businessType: $businessType) {
+    query GetServices($salonId: ID!) {
+        services(salonId: $salonId) {
             name
             description
             price
@@ -37,7 +37,7 @@ export default function SalonLanding() {
   const salon = salons[0] || {}
 
   const { data: servicesData, loading: servicesLoading, error: servicesError } = useQuery(GET_SERVICES, {
-    variables: { businessId: salon.id, businessType: "salon" },
+    variables: { salonId: salon.id },
     skip: !salon.id,
   })
 

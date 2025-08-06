@@ -205,14 +205,9 @@ export const businessResolvers = {
       { input }
     ) => {
       const { restaurantId, ...reservationData } = input;
-      const restaurant = await RestaurantModel.findById(restaurantId);
-      if (!restaurant) {
-        throw new GraphQLError('Restaurant not found.');
-      }
       const reservation = new ReservationModel({
         ...reservationData,
-        businessId: restaurant.clientId,
-        businessType: "restaurant",
+        restaurantId: restaurantId,
         partySize: input.personnes,
         time: input.heure,
         status: "confirmed",
@@ -226,14 +221,9 @@ export const businessResolvers = {
       { input }
     ) => {
       const { restaurantId, ...privatisationData } = input;
-      const restaurant = await RestaurantModel.findById(restaurantId);
-      if (!restaurant) {
-        throw new GraphQLError('Restaurant not found.');
-      }
       const reservation = new ReservationModel({
         ...privatisationData,
-        businessId: restaurant.clientId,
-        businessType: "restaurant",
+        restaurantId: restaurantId,
         partySize: input.personnes,
         time: input.heure,
         duration: input.dureeHeures,

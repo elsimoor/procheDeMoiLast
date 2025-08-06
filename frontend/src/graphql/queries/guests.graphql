@@ -4,13 +4,15 @@
 #       status: String
 #     ): [Guest!]!
 query guests(
-  $businessId: ID!
-  $businessType: String!
+  $restaurantId: ID
+  $hotelId: ID
+  $salonId: ID
   $status: String
 ) {
   guests(
-    businessId: $businessId
-    businessType: $businessType
+    restaurantId: $restaurantId
+    hotelId: $hotelId
+    salonId: $salonId
     status: $status
   ) {
     id

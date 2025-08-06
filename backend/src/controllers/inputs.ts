@@ -145,8 +145,9 @@ export const inputs = gql`
   }
 
   input ServiceInput {
-    businessId: ID!
-    businessType: String!
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     name: String!
     description: String
     category: String
@@ -177,8 +178,9 @@ export const inputs = gql`
   }
 
   input StaffInput {
-    businessId: ID!
-    businessType: String!
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     userId: ID
     name: String!
     role: String!
@@ -202,8 +204,9 @@ export const inputs = gql`
   }
 
   input ReservationInput {
-    businessId: ID!
-    businessType: String!
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     customerId: ID
     customerInfo: CustomerInfoInput!
 
@@ -264,8 +267,9 @@ export const inputs = gql`
   }
 
   input GuestInput {
-    businessId: ID!
-    businessType: String!
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     userId: ID
     name: String!
     email: String!

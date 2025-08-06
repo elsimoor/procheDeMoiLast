@@ -17,8 +17,9 @@ export const serviceTypeDef = gql`
 
   type Service {
     id: ID!
-    businessId: ID!
-    businessType: String!
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     name: String!
     description: String
     category: String

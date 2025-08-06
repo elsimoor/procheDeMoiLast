@@ -9,8 +9,9 @@ interface Context {
 }
 
 interface ServicesArgs {
-  businessId: string;
-  businessType: string;
+  restaurantId?: string;
+  hotelId?: string;
+  salonId?: string;
   category?: string;
 }
 
@@ -34,9 +35,12 @@ export const serviceResolvers: IResolvers<unknown, Context> = {
   Query: {
     services: async (
       _parent,
-      { businessId, businessType, category }: ServicesArgs
+      { restaurantId, hotelId, salonId, category }: ServicesArgs
     ) => {
-      const filter: Record<string, any> = { businessId, businessType, isActive: true };
+      const filter: Record<string, any> = { isActive: true };
+      if (restaurantId) filter.restaurantId = restaurantId;
+      if (hotelId) filter.hotelId = hotelId;
+      if (salonId) filter.salonId = salonId;
       if (category) filter.category = category;
       return ServiceModel.find(filter).sort({ name: 1 });
     },

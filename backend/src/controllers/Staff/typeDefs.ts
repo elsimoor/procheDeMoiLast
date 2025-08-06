@@ -3,8 +3,9 @@ import { gql } from 'apollo-server-express';
 export const staffTypeDef = gql`
   type Staff {
     id: ID!
-    businessId: ID!
-    businessType: String!
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     userId: ID
     name: String!
     role: String!

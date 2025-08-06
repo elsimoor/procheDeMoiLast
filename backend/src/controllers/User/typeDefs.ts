@@ -9,8 +9,9 @@ export const userTypeDefs = gql`
     firstName: String
     email: String!
     role: String!
-    businessType: String
-    businessId: ID
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     avatar: String
     phone: String
     isActive: Boolean!
@@ -42,7 +43,6 @@ export const userTypeDefs = gql`
     firstName: String!
     email: String!
     password: String!
-    businessType: String!
   }
 
   input LoginInput {
@@ -53,8 +53,9 @@ export const userTypeDefs = gql`
   # Input type for updating a user.  Allows assigning a businessId and businessType
   # to link a user to a specific business (hotel/restaurant/salon) or update their role.
   input UserUpdateInput {
-    businessId: ID
-    businessType: String
+    restaurantId: ID
+    hotelId: ID
+    salonId: ID
     role: String
   }
 `;

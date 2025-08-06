@@ -1,8 +1,9 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 interface IService extends Document {
-  businessId: mongoose.Types.ObjectId;
-  businessType: 'hotel' | 'restaurant' | 'salon';
+  restaurantId?: mongoose.Types.ObjectId;
+  hotelId?: mongoose.Types.ObjectId;
+  salonId?: mongoose.Types.ObjectId;
   name: string;
   description?: string;
   category?: string;
@@ -53,18 +54,17 @@ interface IService extends Document {
 }
 
 const serviceSchema = new Schema<IService>({
-  businessId: {
+  restaurantId: {
     type: Schema.Types.ObjectId,
-    required: true,
-    // Link to the client that owns this service.  In previous versions
-    // this field pointed at Hotel/Restaurant/Salon.  Now it always
-    // references a Client document.
-    ref: 'Client',
+    ref: 'Restaurant',
   },
-  businessType: {
-    type: String,
-    enum: ['hotel', 'restaurant', 'salon'],
-    required: true
+  hotelId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Hotel',
+  },
+  salonId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Salon',
   },
   name: {
     type: String,
