@@ -48,8 +48,8 @@ export const dashboardResolvers = {
     },
 
     dashboardCalendar: async (_, { restaurantId, month }) => {
-      const start = moment(month).startOf('month').toDate();
-      const end = moment(month).endOf('month').toDate();
+      const start = moment.utc(month).startOf('month').toDate();
+      const end = moment.utc(month).endOf('month').toDate();
 
       const reservations = await ReservationModel.find({
         businessId: restaurantId,
@@ -58,7 +58,7 @@ export const dashboardResolvers = {
       }).select('date');
 
       const heatMap = reservations.reduce((acc, r) => {
-        const dateStr = moment(r.date).format('YYYY-MM-DD');
+        const dateStr = moment.utc(r.date).format('YYYY-MM-DD');
         acc[dateStr] = (acc[dateStr] || 0) + 1;
         return acc;
       }, {});
@@ -70,8 +70,8 @@ export const dashboardResolvers = {
     },
 
     reservationsByDate: async (_, { restaurantId, date }) => {
-      const targetDate = moment(date).startOf('day').toDate();
-      const nextDay = moment(targetDate).add(1, 'days').toDate();
+      const targetDate = moment.utc(date).startOf('day').toDate();
+      const nextDay = moment.utc(targetDate).add(1, 'days').toDate();
 
       const reservations = await ReservationModel.find({
         businessId: restaurantId,
@@ -81,7 +81,7 @@ export const dashboardResolvers = {
 
       return reservations.map(r => ({
         id: r._id.toString(),
-        date: moment(r.date).format('YYYY-MM-DD'),
+        date: moment.utc(r.date).format('YYYY-MM-DD'),
         heure: r.time,
         restaurant: r.businessId ? (r.businessId as any).name : 'N/A',
         personnes: r.partySize,
