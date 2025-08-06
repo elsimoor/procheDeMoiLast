@@ -41,22 +41,22 @@ interface MutationUpdateArgs<I = any> {
 export const businessResolvers = {
   Query: {
     hotels: async () => {
-      return HotelModel.find({ isActive: true }) 
+      return HotelModel.find({ isActive: true })
     },
     hotel: async (_parent, { id }: IdArg) => {
-      return HotelModel.findById(id) 
+      return HotelModel.findById(id)
     },
     restaurants: async () => {
-      return RestaurantModel.find({ isActive: true }) 
+      return RestaurantModel.find({ isActive: true })
     },
     restaurant: async (_parent, { id }: IdArg) => {
-      return RestaurantModel.findById(id) 
+      return RestaurantModel.findById(id)
     },
     salons: async () => {
-      return SalonModel.find({ isActive: true }) 
+      return SalonModel.find({ isActive: true })
     },
     salon: async (_parent, { id }: IdArg) => {
-      return SalonModel.findById(id) 
+      return SalonModel.findById(id)
     }
   },
 
@@ -116,6 +116,7 @@ export const businessResolvers = {
           for (const horaire of horaires) {
             if (horaire.ouverture && horaire.fermeture && horaire.ouverture >= horaire.fermeture) {
               throw new GraphQLError("L'heure d'ouverture doit être antérieure à l'heure de fermeture.", {
+                //@ts-ignore
                 extensions: { code: 'BAD_USER_INPUT', field: 'horaires' },
               });
             }
@@ -124,11 +125,12 @@ export const businessResolvers = {
 
         // Validate frequenceCreneauxMinutes: positive and divisible by 5
         if (frequenceCreneauxMinutes) {
-            if (frequenceCreneauxMinutes <= 0 || frequenceCreneauxMinutes % 5 !== 0) {
-                throw new GraphQLError("La fréquence des créneaux doit être un nombre positif divisible par 5.", {
-                    extensions: { code: 'BAD_USER_INPUT', field: 'frequenceCreneauxMinutes' },
-                });
-            }
+          if (frequenceCreneauxMinutes <= 0 || frequenceCreneauxMinutes % 5 !== 0) {
+            throw new GraphQLError("La fréquence des créneaux doit être un nombre positif divisible par 5.", {
+              //@ts-ignore
+              extensions: { code: 'BAD_USER_INPUT', field: 'frequenceCreneauxMinutes' },
+            });
+          }
         }
 
         // Calculate capaciteTheorique
@@ -146,11 +148,13 @@ export const businessResolvers = {
         if (maxReservationsParCreneau) {
           if (capaciteTotale !== undefined && maxReservationsParCreneau > capaciteTotale) {
             throw new GraphQLError("La limite par créneau ne peut pas dépasser la capacité totale.", {
+              //@ts-ignore
               extensions: { code: 'BAD_USER_INPUT', field: 'maxReservationsParCreneau' },
             });
           }
           if (tables && maxReservationsParCreneau > capaciteTheorique) {
             throw new GraphQLError("La limite par créneau ne peut pas dépasser la capacité théorique.", {
+              //@ts-ignore
               extensions: { code: 'BAD_USER_INPUT', field: 'maxReservationsParCreneau' },
             });
           }

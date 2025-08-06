@@ -1,7 +1,6 @@
 import { gql } from 'apollo-server-express';
 
 export const businessTypeDef = gql`
-  scalar Date
 
   type OpeningPeriod {
     startDate: Date!

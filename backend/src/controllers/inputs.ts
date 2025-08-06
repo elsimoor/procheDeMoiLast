@@ -44,20 +44,9 @@ export const inputs = gql`
     images: [String!]
   }
 
-  input AddressInput {
-    street: String
-    city: String
-    state: String
-    zipCode: String
-    country: String
-  }
+ 
 
-  input ContactInput {
-    phone: String
-    email: String
-    website: String
-  }
-
+  
   input HotelSettingsInput {
     checkInTime: String
     checkOutTime: String
@@ -67,15 +56,7 @@ export const inputs = gql`
     serviceFee: Float
   }
 
-  input RestaurantSettingsInput {
-    currency: String
-    timezone: String
-    taxRate: Float
-    serviceFee: Float
-    maxPartySize: Int
-    reservationWindow: Int
-    cancellationHours: Int
-  }
+
 
   input SalonSettingsInput {
     currency: String

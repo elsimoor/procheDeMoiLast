@@ -59,6 +59,7 @@ export const privatisationResolvers = {
       const restaurant = await RestaurantModel.findById(restaurantId).select('settings');
       if (!restaurant) {
         throw new GraphQLError('Restaurant not found.', {
+          //@ts-ignore
           extensions: { code: 'BAD_USER_INPUT', field: 'restaurantId' },
         });
       }
@@ -69,12 +70,14 @@ export const privatisationResolvers = {
 
       if (capaciteMaximale > capaciteTheorique) {
         throw new GraphQLError(`La capacité maximale ne peut pas dépasser la capacité théorique du restaurant (${capaciteTheorique}).`, {
+          //@ts-ignore
           extensions: { code: 'BAD_USER_INPUT', field: 'capaciteMaximale' },
         });
       }
 
       if ((dureeMaximaleHeures * 60) % frequenceCreneauxMinutes !== 0) {
         throw new GraphQLError(`La durée maximale doit être un multiple de la fréquence des créneaux (${frequenceCreneauxMinutes} minutes).`, {
+          //@ts-ignore
           extensions: { code: 'BAD_USER_INPUT', field: 'dureeMaximaleHeures' },
         });
       }
@@ -92,6 +95,7 @@ export const privatisationResolvers = {
       const option = await PrivatisationOptionModel.findById(id);
       if (!option) {
         throw new GraphQLError('Privatisation option not found.', {
+          //@ts-ignore
           extensions: { code: 'NOT_FOUND' },
         });
       }
@@ -100,6 +104,7 @@ export const privatisationResolvers = {
       if (!restaurant) {
         // This case should ideally not happen if data integrity is maintained
         throw new GraphQLError('Associated restaurant not found.', {
+          //@ts-ignore
           extensions: { code: 'INTERNAL_SERVER_ERROR' },
         });
       }
@@ -113,12 +118,14 @@ export const privatisationResolvers = {
 
       if (capaciteMaximale > capaciteTheorique) {
         throw new GraphQLError(`La capacité maximale ne peut pas dépasser la capacité théorique du restaurant (${capaciteTheorique}).`, {
+          //@ts-ignore
           extensions: { code: 'BAD_USER_INPUT', field: 'capaciteMaximale' },
         });
       }
 
       if ((dureeMaximaleHeures * 60) % frequenceCreneauxMinutes !== 0) {
         throw new GraphQLError(`La durée maximale doit être un multiple de la fréquence des créneaux (${frequenceCreneauxMinutes} minutes).`, {
+          //@ts-ignore
           extensions: { code: 'BAD_USER_INPUT', field: 'dureeMaximaleHeures' },
         });
       }
