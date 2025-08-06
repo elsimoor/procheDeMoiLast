@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { gql, useQuery, useMutation } from "@apollo/client"
 import { Plus, Edit, Trash2 } from "lucide-react"
 import { ImageUpload } from "@/components/ui/ImageUpload"
-import { uploadImage } from "@/lib/firebase"
+import { uploadImage } from "@/app/lib/firebase"
 
 interface Table {
   id: string

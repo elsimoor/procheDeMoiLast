@@ -19,6 +19,7 @@ export const tableTypeDefs = gql`
     features: [String!]!
     position: Position
     isActive: Boolean!
+    images: [String]
     createdAt: Date!
     updatedAt: Date!
   }
