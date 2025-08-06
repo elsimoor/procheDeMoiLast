@@ -136,13 +136,6 @@ export const userResolvers = {
 
     ,
 
-    /**
-     * Update an existing user.  This mutation allows administrators to assign
-     * a user to a particular business by setting their `businessId` and
-     * `businessType`, or to change their role.  Only authenticated users
-     * may perform this operation.  The resolver simply finds the user by
-     * id and applies the provided fields.
-     */
     updateUser: async (
       _parent,
       { id, input }: { id: string; input: { restaurantId?: string; hotelId?: string; salonId?: string; role?: string } },

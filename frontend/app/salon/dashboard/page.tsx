@@ -67,7 +67,6 @@ export default function SalonDashboard() {
   // represents.  If the user does not belong to a salon business
   // then an error message is displayed.
   const [salonId, setSalonId] = useState<string | null>(null)
-  const [businessType, setBusinessType] = useState<string | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
   const [sessionError, setSessionError] = useState<string | null>(null)
 
@@ -83,9 +82,8 @@ export default function SalonDashboard() {
           return
         }
         const data = await res.json()
-        if (data.businessType && data.businessType.toLowerCase() === "salon" && data.businessId) {
-          setSalonId(data.businessId)
-          setBusinessType(data.businessType.toLowerCase())
+        if (data.salonId) {
+          setSalonId(data.salonId)
         } else {
           setSessionError("You are not associated with a salon business.")
         }
@@ -100,8 +98,8 @@ export default function SalonDashboard() {
 
   // GraphQL queries
   const GET_RESERVATIONS = gql`
-    query GetReservations($businessId: ID!, $businessType: String!) {
-      reservations(businessId: $businessId, businessType: $businessType) {
+    query GetReservations($salonId: ID!) {
+      reservations(salonId: $salonId) {
         id
         customerInfo {
           name
@@ -127,8 +125,8 @@ export default function SalonDashboard() {
     }
   `
   const GET_SERVICES = gql`
-    query GetServices($businessId: ID!, $businessType: String!) {
-      services(businessId: $businessId, businessType: $businessType) {
+    query GetServices($salonId: ID!) {
+      services(salonId: $salonId) {
         id
         name
         duration
@@ -138,8 +136,8 @@ export default function SalonDashboard() {
     }
   `
   const GET_STAFF = gql`
-    query GetStaff($businessId: ID!, $businessType: String!) {
-      staff(businessId: $businessId, businessType: $businessType) {
+    query GetStaff($salonId: ID!) {
+      staff(salonId: $salonId) {
         id
         name
         role
@@ -148,16 +146,16 @@ export default function SalonDashboard() {
   `
 
   const { data: reservationsData, loading: reservationsLoading, error: reservationsError } = useQuery(GET_RESERVATIONS, {
-    variables: { businessId: salonId, businessType },
-    skip: !salonId || !businessType,
+    variables: { salonId },
+    skip: !salonId,
   })
   const { data: servicesData, loading: servicesLoading, error: servicesError } = useQuery(GET_SERVICES, {
-    variables: { businessId: salonId, businessType },
-    skip: !salonId || !businessType,
+    variables: { salonId },
+    skip: !salonId,
   })
   const { data: staffData, loading: staffLoading, error: staffError } = useQuery(GET_STAFF, {
-    variables: { businessId: salonId, businessType },
-    skip: !salonId || !businessType,
+    variables: { salonId },
+    skip: !salonId,
   })
 
   // Derive arrays from query data

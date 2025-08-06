@@ -155,26 +155,26 @@ export const dashboardResolvers = {
 
       // TODO: Add capacity check logic here later
 
-      const updatedReservation = await ReservationModel.findByIdAndUpdate(id, input, { new: true }).populate('businessId');
+      const updatedReservation = await ReservationModel.findByIdAndUpdate(id, input, { new: true }).populate('restaurantId');
 
       return {
         id: updatedReservation._id.toString(),
         date: moment(updatedReservation.date).format('YYYY-MM-DD'),
         heure: updatedReservation.time,
-        restaurant: updatedReservation.businessId ? (updatedReservation.businessId as any).name : 'N/A',
+        restaurant: updatedReservation.restaurantId ? (updatedReservation.restaurantId as any).name : 'N/A',
         personnes: updatedReservation.partySize,
         statut: updatedReservation.status.toUpperCase(),
       };
     },
     cancelReservation: async (_, { id }) => {
-      const cancelledReservation = await ReservationModel.findByIdAndUpdate(id, { status: 'cancelled' }, { new: true }).populate('businessId');
+      const cancelledReservation = await ReservationModel.findByIdAndUpdate(id, { status: 'cancelled' }, { new: true }).populate('restaurantId');
       if (!cancelledReservation) throw new GraphQLError('Reservation not found.');
 
       return {
         id: cancelledReservation._id.toString(),
         date: moment(cancelledReservation.date).format('YYYY-MM-DD'),
         heure: cancelledReservation.time,
-        restaurant: cancelledReservation.businessId ? (cancelledReservation.businessId as any).name : 'N/A',
+        restaurant: cancelledReservation.restaurantId ? (cancelledReservation.restaurantId as any).name : 'N/A',
         personnes: cancelledReservation.partySize,
         statut: cancelledReservation.status.toUpperCase(),
       };

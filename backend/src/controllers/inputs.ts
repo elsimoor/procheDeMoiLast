@@ -3,6 +3,7 @@ import { gql } from 'apollo-server-express';
 
 export const inputs = gql`
   input HotelInput {
+    clientId: ID!
     # Name is optional in updates; still required when creating a hotel
     name: String
     description: String
@@ -34,6 +35,7 @@ export const inputs = gql`
   }
 
   input SalonInput {
+    clientId: ID!
     name: String!
     description: String
     address: AddressInput

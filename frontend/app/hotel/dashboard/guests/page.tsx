@@ -12,8 +12,8 @@ import { gql, useQuery, useMutation } from "@apollo/client";
 
 // GraphQL query to fetch guests belonging to a specific business
 const GET_GUESTS = gql`
-  query GetGuests($businessId: ID!, $businessType: String!) {
-    guests(businessId: $businessId, businessType: $businessType) {
+  query GetGuests($hotelId: ID!) {
+    guests(hotelId: $hotelId) {
       id
       name
       email
@@ -70,8 +70,7 @@ interface GuestFormState {
 
 export default function HotelGuestsPage() {
   // Retrieve business context from the session API
-  const [businessId, setBusinessId] = useState<string | null>(null);
-  const [businessType, setBusinessType] = useState<string | null>(null);
+  const [hotelId, setHotelId] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
@@ -86,9 +85,8 @@ export default function HotelGuestsPage() {
         const data = await res.json();
         // Compare businessType case-insensitively.  Session stores the
         // string in lowercase (e.g. "hotel").
-        if (data.businessType && data.businessType.toLowerCase() === "hotel" && data.businessId) {
-          setBusinessId(data.businessId);
-          setBusinessType(data.businessType);
+        if (data.hotelId) {
+          setHotelId(data.hotelId);
         } else {
           setSessionError("You are not associated with a hotel business.");
         }
@@ -108,8 +106,8 @@ export default function HotelGuestsPage() {
     error: guestsError,
     refetch: refetchGuests,
   } = useQuery(GET_GUESTS, {
-    variables: { businessId, businessType },
-    skip: !businessId || !businessType,
+    variables: { hotelId },
+    skip: !hotelId,
   });
 
   // Mutations
@@ -140,10 +138,9 @@ export default function HotelGuestsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessId || !businessType) return;
+    if (!hotelId) return;
     const input: any = {
-      businessId,
-      businessType,
+      hotelId,
       name: formState.name,
       email: formState.email,
       phone: formState.phone,

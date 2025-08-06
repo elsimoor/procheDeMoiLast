@@ -41,6 +41,7 @@ interface Rating {
 }
 
 interface Salon extends Document {
+  clientId: mongoose.Types.ObjectId;
   name: string;
   description?: string;
   address?: Address;
@@ -55,6 +56,11 @@ interface Salon extends Document {
 }
 
 const salonSchema = new Schema<Salon>({
+  clientId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Client',
+    required: true,
+  },
   name: {
     type: String,
     required: true,

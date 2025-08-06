@@ -53,7 +53,6 @@ export default function SalonServices() {
   const [showModal, setShowModal] = useState(false)
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [salonId, setSalonId] = useState<string | null>(null)
-  const [businessType, setBusinessType] = useState<string | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
   const [sessionError, setSessionError] = useState<string | null>(null)
 
@@ -66,9 +65,8 @@ export default function SalonServices() {
           return
         }
         const data = await res.json()
-        if (data.businessType && data.businessType.toLowerCase() === "salon" && data.businessId) {
-          setSalonId(data.businessId)
-          setBusinessType(data.businessType.toLowerCase())
+        if (data.salonId) {
+          setSalonId(data.salonId)
         } else {
           setSessionError("You are not associated with a salon business.")
         }
@@ -83,8 +81,8 @@ export default function SalonServices() {
 
   // GraphQL queries and mutations
   const GET_SERVICES = gql`
-    query GetServices($businessId: ID!, $businessType: String!) {
-      services(businessId: $businessId, businessType: $businessType) {
+    query GetServices($salonId: ID!) {
+      services(salonId: $salonId) {
         id
         name
         description
@@ -105,8 +103,8 @@ export default function SalonServices() {
   // Fetch staff list for default employee selection.  We re-use the staff query
   // from other pages to populate a dropdown of employees.
   const GET_STAFF = gql`
-    query GetStaff($businessId: ID!, $businessType: String!) {
-      staff(businessId: $businessId, businessType: $businessType) {
+    query GetStaff($salonId: ID!) {
+      staff(salonId: $salonId) {
         id
         name
         role
@@ -118,8 +116,8 @@ export default function SalonServices() {
   // to the salonId, so we query tables by restaurantId.  Only id and
   // location (name) are needed for the dropdown.
   const GET_ROOMS = gql`
-    query GetTables($restaurantId: ID!) {
-      tables(restaurantId: $restaurantId) {
+    query GetTables($salonId: ID!) {
+      tables(salonId: $salonId) {
         id
         location
         capacity
@@ -147,17 +145,17 @@ export default function SalonServices() {
   `
 
   const { data: servicesData, loading: servicesLoading, error: servicesError, refetch: refetchServices } = useQuery(GET_SERVICES, {
-    variables: { businessId: salonId, businessType },
-    skip: !salonId || !businessType,
+    variables: { salonId: salonId },
+    skip: !salonId,
   })
 
   // staff query for default employee field
   const { data: staffData } = useQuery(GET_STAFF, {
-    variables: { businessId: salonId, businessType },
-    skip: !salonId || !businessType,
+    variables: { salonId: salonId },
+    skip: !salonId,
   })
   const { data: roomsData } = useQuery(GET_ROOMS, {
-    variables: { restaurantId: salonId },
+    variables: { salonId: salonId },
     skip: !salonId,
   })
   const [createService] = useMutation(CREATE_SERVICE)
@@ -239,13 +237,12 @@ export default function SalonServices() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!salonId || !businessType) {
+    if (!salonId) {
       alert("Unable to save service: salon context unavailable.")
       return
     }
     const input = {
-      businessId: salonId,
-      businessType: "salon",
+      salonId: salonId,
       name: formData.name || "",
       description: formData.description || "",
       category: formData.category || "other",

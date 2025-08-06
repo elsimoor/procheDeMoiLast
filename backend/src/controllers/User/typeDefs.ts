@@ -50,8 +50,6 @@ export const userTypeDefs = gql`
     password: String!
   }
 
-  # Input type for updating a user.  Allows assigning a businessId and businessType
-  # to link a user to a specific business (hotel/restaurant/salon) or update their role.
   input UserUpdateInput {
     restaurantId: ID
     hotelId: ID

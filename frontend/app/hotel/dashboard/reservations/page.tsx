@@ -57,8 +57,8 @@ const GET_ROOMS = gql`
 
 // Query to fetch reservations for a business
 const GET_RESERVATIONS = gql`
-  query GetReservations($businessId: ID!, $businessType: String!) {
-    reservations(businessId: $businessId, businessType: $businessType) {
+  query GetReservations($hotelId: ID!) {
+    reservations(hotelId: $hotelId) {
       id
       customerInfo {
         name
@@ -120,8 +120,7 @@ interface ReservationFormState {
 
 export default function HotelReservationsPage() {
   // Session / business context
-  const [businessId, setBusinessId] = useState<string | null>(null);
-  const [businessType, setBusinessType] = useState<string | null>(null);
+  const [hotelId, setHotelId] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
   useEffect(() => {
@@ -135,9 +134,8 @@ export default function HotelReservationsPage() {
         const data = await res.json();
         // Session stores the businessType in lower case.  Compare
         // case-insensitively when determining if this is a hotel account.
-        if (data.businessType && data.businessType.toLowerCase() === "hotel" && data.businessId) {
-          setBusinessId(data.businessId);
-          setBusinessType(data.businessType);
+        if (data.hotelId) {
+          setHotelId(data.hotelId);
         } else {
           setSessionError("You are not associated with a hotel business.");
         }
@@ -156,8 +154,8 @@ export default function HotelReservationsPage() {
     loading: roomsLoading,
     error: roomsError,
   } = useQuery(GET_ROOMS, {
-    variables: { hotelId: businessId },
-    skip: !businessId,
+    variables: { hotelId: hotelId },
+    skip: !hotelId,
   });
 
   // Fetch reservations
@@ -167,8 +165,8 @@ export default function HotelReservationsPage() {
     error: reservationsError,
     refetch: refetchReservations,
   } = useQuery(GET_RESERVATIONS, {
-    variables: { businessId, businessType },
-    skip: !businessId || !businessType,
+    variables: { hotelId },
+    skip: !hotelId,
   });
 
   // Mutations
@@ -209,11 +207,10 @@ const [updateReservation] = useMutation(UPDATE_RESERVATION);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessId || !businessType) return;
+    if (!hotelId) return;
     try {
       const input: any = {
-        businessId,
-        businessType,
+        hotelId,
         customerInfo: {
           name: formState.guestName,
           email: formState.guestEmail,
@@ -247,11 +244,10 @@ const [updateReservation] = useMutation(UPDATE_RESERVATION);
   // changing the status we need to send all required fields expected by
   // ReservationInput because GraphQL does not support partial updates.
   const handleStatusChange = async (reservation: any, newStatus: string) => {
-    if (!businessId || !businessType) return;
+    if (!hotelId) return;
     try {
       const input: any = {
-        businessId,
-        businessType,
+        hotelId,
         customerInfo: {
           name: reservation.customerInfo?.name,
           email: reservation.customerInfo?.email,

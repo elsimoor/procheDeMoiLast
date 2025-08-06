@@ -1,6 +1,9 @@
 import RoomModel from "../models/RoomModel";
 import ServiceModel from "../models/ServiceModel";
 import StaffModel from "../models/StaffModel";
+import RestaurantModel from "../models/RestaurantModel";
+import HotelModel from "../models/HotelModel";
+import SalonModel from "../models/SalonModel";
 
 // Import the Client model used to load businesses/clients.  Previously we
 // loaded Hotel documents directly; in order to support multi‑tenant clients
@@ -54,6 +57,21 @@ const BatchUStaff = async (ids: any) => {
   return ids.map((id: any) => staff.find((s: any) => s.id == id));
 };
 
+const BatchRestaurant = async (ids: any) => {
+  const restaurants = await RestaurantModel.find({ _id: { $in: ids } });
+  return ids.map((id: any) => restaurants.find((restaurant: any) => restaurant.id == id));
+};
+
+const BatchHotel = async (ids: any) => {
+  const hotels = await HotelModel.find({ _id: { $in: ids } });
+  return ids.map((id: any) => hotels.find((hotel: any) => hotel.id == id));
+};
+
+const BatchSalon = async (ids: any) => {
+  const salons = await SalonModel.find({ _id: { $in: ids } });
+  return ids.map((id: any) => salons.find((salon: any) => salon.id == id));
+};
+
 
 
 
@@ -64,4 +82,7 @@ export {
   BatchTable,
   BatchService,
   BatchUStaff,
+  BatchRestaurant,
+  BatchHotel,
+  BatchSalon,
 };

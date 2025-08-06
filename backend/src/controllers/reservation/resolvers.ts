@@ -121,12 +121,18 @@ export const reservationResolvers = {
      * `null` if no client is associated with the reservation.
      */
     client: async ({ restaurantId, hotelId, salonId }, _args, { Loaders }) => {
-      const businessId = restaurantId || hotelId || salonId;
-      if (!businessId) return null;
-      // This assumes the 'business' loader can fetch any business type
-      // and that the returned business document has a clientId.
-      const business = await Loaders.business.load(businessId);
-      return business ? await Loaders.client.load(business.clientId) : null;
+      let business;
+      if (restaurantId) {
+        business = await Loaders.restaurant.load(restaurantId);
+      } else if (hotelId) {
+        business = await Loaders.hotel.load(hotelId);
+      } else if (salonId) {
+        business = await Loaders.salon.load(salonId);
+      }
+
+      if (!business || !business.clientId) return null;
+
+      return await Loaders.client.load(business.clientId);
     },
     customerId: async ({ customerId }, _, { Loaders }) => {
       return (await customerId) ? await Loaders.user.load(customerId) : null;

@@ -34,7 +34,7 @@ export const root = gql`
     room(id: ID!): Room
 
     # Tables
-    tables(restaurantId: ID!, status: String): [Table!]!
+    tables(restaurantId: ID, salonId: ID, status: String): [Table!]!
     table(id: ID!): Table
 
     # Services

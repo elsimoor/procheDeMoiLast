@@ -42,8 +42,8 @@ export default function SalonRooms() {
           return
         }
         const data = await res.json()
-        if (data.businessType && data.businessType.toLowerCase() === "salon" && data.businessId) {
-          setSalonId(data.businessId)
+        if (data.salonId) {
+          setSalonId(data.salonId)
         } else {
           setSessionError("You are not associated with a salon business.")
         }
@@ -58,8 +58,8 @@ export default function SalonRooms() {
 
   // GraphQL operations
   const GET_TABLES = gql`
-    query GetTables($restaurantId: ID!) {
-      tables(restaurantId: $restaurantId) {
+    query GetTables($salonId: ID!) {
+      tables(salonId: $salonId) {
         id
         number
         capacity
@@ -90,7 +90,7 @@ export default function SalonRooms() {
   `
 
   const { data, loading, error, refetch } = useQuery(GET_TABLES, {
-    variables: { restaurantId: salonId },
+    variables: { salonId: salonId },
     skip: !salonId,
   })
   const [createTable] = useMutation(CREATE_TABLE, {
@@ -128,7 +128,7 @@ export default function SalonRooms() {
       .map((s) => s.trim())
       .filter((s) => s.length > 0)
     const input: any = {
-      restaurantId: salonId,
+      salonId: salonId,
       number: editingRoom ? editingRoom.number : rooms.length + 1,
       capacity: formData.capacity,
       location: formData.name,

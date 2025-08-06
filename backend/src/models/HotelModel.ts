@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 interface HotelDocument extends Document {
+  clientId: mongoose.Types.ObjectId;
   name: string;
   description: string;
   address: {
@@ -57,6 +58,11 @@ interface HotelDocument extends Document {
 }
 
 const hotelSchema = new Schema<HotelDocument>({
+  clientId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Client',
+    required: true,
+  },
   name: {
     type: String,
     required: true,

@@ -14,10 +14,12 @@ export const tableResolvers = {
   Query: {
     tables: async (
       _: any,
-      { restaurantId, status }: { restaurantId: string; status?: string },
+      { restaurantId, salonId, status }: { restaurantId?: string; salonId?: string; status?: string },
       _ctx: Context
     ) => {
-      const filter: any = { restaurantId, isActive: true };
+      const filter: any = { isActive: true };
+      if (restaurantId) filter.restaurantId = restaurantId;
+      if (salonId) filter.salonId = salonId;
       if (status) {
         filter.status = status;
       }
