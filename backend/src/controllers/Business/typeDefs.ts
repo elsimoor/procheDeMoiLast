@@ -2,6 +2,7 @@
 import { gql } from 'apollo-server-express';
 
 export const businessTypeDef = gql`
+
   type OpeningPeriod {
     startDate: Date!
     endDate: Date!
@@ -107,12 +108,12 @@ export const businessTypeDef = gql`
     fermeture: String
   }
 
-  # type Tables {
-  #   "2": Int
-  #   "4": Int
-  #   "6": Int
-  #   "8": Int
-  # }
+  type Tables {
+    "2": Int
+    "4": Int
+    "6": Int
+    "8": Int
+  }
 
   input RestaurantSettingsInput {
     currency: String

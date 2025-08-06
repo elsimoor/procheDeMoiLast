@@ -24,10 +24,10 @@ const GET_RESTAURANT_SETTINGS = gql`
         }
         capaciteTotale
         tables {
-          "2"
-          "4"
-          "6"
-          "8"
+          size2
+          size4
+          size6
+          size8
         }
         frequenceCreneauxMinutes
         maxReservationsParCreneau
@@ -53,10 +53,10 @@ const formSchema = z.object({
   ).min(1, "Au moins une plage horaire est requise."),
   capaciteTotale: z.coerce.number().positive("La capacité totale doit être un nombre positif."),
   tables: z.object({
-    '2': z.coerce.number().min(0),
-    '4': z.coerce.number().min(0),
-    '6': z.coerce.number().min(0),
-    '8': z.coerce.number().min(0),
+    size2: z.coerce.number().min(0),
+    size4: z.coerce.number().min(0),
+    size6: z.coerce.number().min(0),
+    size8: z.coerce.number().min(0),
   }),
   frequenceCreneauxMinutes: z.coerce.number().positive("La fréquence doit être un nombre positif."),
   maxReservationsParCreneau: z.coerce.number().positive("La limite doit être un nombre positif."),
@@ -84,7 +84,7 @@ export default function TablesDisponibilitesPage() {
         { ouverture: "", fermeture: "" },
       ],
       capaciteTotale: 0,
-      tables: { '2': 0, '4': 0, '6': 0, '8': 0 },
+      tables: { size2: 0, size4: 0, size6: 0, size8: 0 },
       frequenceCreneauxMinutes: 0,
       maxReservationsParCreneau: 0,
     },
@@ -120,7 +120,7 @@ export default function TablesDisponibilitesPage() {
         form.reset({
             horaires: settings.horaires.length ? settings.horaires : [{ ouverture: "", fermeture: "" }, { ouverture: "", fermeture: "" }],
             capaciteTotale: settings.capaciteTotale || 0,
-            tables: settings.tables || { '2': 0, '4': 0, '6': 0, '8': 0 },
+            tables: settings.tables || { size2: 0, size4: 0, size6: 0, size8: 0 },
             frequenceCreneauxMinutes: settings.frequenceCreneauxMinutes || 0,
             maxReservationsParCreneau: settings.maxReservationsParCreneau || 0,
         });
@@ -134,10 +134,10 @@ export default function TablesDisponibilitesPage() {
   const watchCapaciteTotale = form.watch("capaciteTotale");
 
   const capaciteTheorique =
-    (watchTables['2'] || 0) * 2 +
-    (watchTables['4'] || 0) * 4 +
-    (watchTables['6'] || 0) * 6 +
-    (watchTables['8'] || 0) * 8;
+    (watchTables.size2 || 0) * 2 +
+    (watchTables.size4 || 0) * 4 +
+    (watchTables.size6 || 0) * 6 +
+    (watchTables.size8 || 0) * 8;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!restaurantId) return;
@@ -255,7 +255,7 @@ export default function TablesDisponibilitesPage() {
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                     control={form.control}
-                    name="tables.2"
+                    name="tables.size2"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Tables de 2 personnes</FormLabel>
@@ -268,7 +268,7 @@ export default function TablesDisponibilitesPage() {
                 />
                 <FormField
                     control={form.control}
-                    name="tables.4"
+                    name="tables.size4"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Tables de 4 personnes</FormLabel>
@@ -281,7 +281,7 @@ export default function TablesDisponibilitesPage() {
                 />
                 <FormField
                     control={form.control}
-                    name="tables.6"
+                    name="tables.size6"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Tables de 6 personnes</FormLabel>
@@ -294,7 +294,7 @@ export default function TablesDisponibilitesPage() {
                 />
                 <FormField
                     control={form.control}
-                    name="tables.8"
+                    name="tables.size8"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Tables de 8 personnes</FormLabel>
