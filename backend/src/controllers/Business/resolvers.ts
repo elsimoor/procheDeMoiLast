@@ -16,17 +16,7 @@ interface IdArg {
 type CreateHotelInput = any;      // replace `any` with your actual input shape
 type UpdateHotelInput = any;
 type CreateRestaurantInput = any;
-interface UpdateRestaurantInput {
-  name?: string;
-  description?: string;
-  settings?: {
-    horaires?: { ouverture: string; fermeture: string }[];
-    capaciteTotale?: number;
-    tables?: { '2'?: number; '4'?: number; '6'?: number; '8'?: number };
-    frequenceCreneauxMinutes?: number;
-    maxReservationsParCreneau?: number;
-  };
-}
+
 type CreateSalonInput = any;
 type UpdateSalonInput = any;
 
@@ -99,7 +89,7 @@ export const businessResolvers = {
 
     updateRestaurant: async (
       _parent,
-      { id, input }: MutationUpdateArgs<UpdateRestaurantInput>,
+      { id, input },
       _ctx: Context
     ) => {
       if (input.settings && input.settings.tables) {

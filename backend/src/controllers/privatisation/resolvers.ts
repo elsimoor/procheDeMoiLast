@@ -38,7 +38,7 @@ interface MutationUpdateArgs {
 
 export const privatisationResolvers = {
   Query: {
-    privatisationOptionsByRestaurant: async (_parent, { restaurantId }: { restaurantId: string }) => {
+    privatisationOptionsByRestaurant: async (_parent, { restaurantId }) => {
       return PrivatisationOptionModel.find({ restaurantId });
     },
     privatisationOption: async (_parent, { id }: IdArg) => {
