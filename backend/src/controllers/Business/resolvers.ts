@@ -22,7 +22,7 @@ interface UpdateRestaurantInput {
   settings?: {
     horaires?: { ouverture: string; fermeture: string }[];
     capaciteTotale?: number;
-    tables?: { '2'?: number; '4'?: number; '6'?: number; '8'?: number };
+    tables?: { size2?: number; size4?: number; size6?: number; size8?: number };
     frequenceCreneauxMinutes?: number;
     maxReservationsParCreneau?: number;
   };
@@ -104,7 +104,7 @@ export const businessResolvers = {
     ) => {
       if (input.settings && input.settings.tables) {
         const tables = input.settings.tables;
-        const capaciteTheorique = (tables['2'] || 0) * 2 + (tables['4'] || 0) * 4 + (tables['6'] || 0) * 6 + (tables['8'] || 0) * 8;
+        const capaciteTheorique = (tables.size2 || 0) * 2 + (tables.size4 || 0) * 4 + (tables.size6 || 0) * 6 + (tables.size8 || 0) * 8;
         input.settings['capaciteTheorique'] = capaciteTheorique;
       }
       return RestaurantModel.findByIdAndUpdate(id, input, { new: true });

@@ -38,7 +38,7 @@ interface RestaurantDocument extends Document {
     cancellationHours: number;
     horaires: { ouverture: string; fermeture: string }[];
     capaciteTotale: number;
-    tables: { '2': number; '4': number; '6': number; '8': number };
+    tables: { size2: number; size4: number; size6: number; size8: number };
     frequenceCreneauxMinutes: number;
     maxReservationsParCreneau: number;
     capaciteTheorique: number;
@@ -89,10 +89,10 @@ const restaurantSchema = new Schema<RestaurantDocument>({
     }],
     capaciteTotale: { type: Number, default: 0 },
     tables: {
-      '2': { type: Number, default: 0 },
-      '4': { type: Number, default: 0 },
-      '6': { type: Number, default: 0 },
-      '8': { type: Number, default: 0 }
+      size2: { type: Number, default: 0 },
+      size4: { type: Number, default: 0 },
+      size6: { type: Number, default: 0 },
+      size8: { type: Number, default: 0 }
     },
     frequenceCreneauxMinutes: { type: Number, default: 30 },
     maxReservationsParCreneau: { type: Number, default: 10 },
