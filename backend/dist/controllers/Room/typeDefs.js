@@ -7,7 +7,7 @@ exports.roomTypeDef = (0, apollo_server_express_1.gql) `
 
   type Room {
     id: ID!
-    hotelId: ID!
+    hotelId: Hotel
     number: String!
     type: String!
     floor: Int
@@ -39,7 +39,8 @@ exports.roomTypeDef = (0, apollo_server_express_1.gql) `
     overlapping check‑in/check‑out dates for that room.  Both
     parameters are required and should be ISO formatted dates.
     """
-    availableRooms(hotelId: ID!, checkIn: Date!, checkOut: Date!): [Room!]!
+    availableRooms(hotelId: ID!, checkIn: Date!, checkOut: Date!, adults: Int!, children: Int!): [Room!]!
+    availableRoomsCount(hotelId: ID!, checkIn: Date!, checkOut: Date!, adults: Int!, children: Int!): Int!
   }
 `;
 //# sourceMappingURL=typeDefs.js.map

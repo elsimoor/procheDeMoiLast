@@ -1,6 +1,8 @@
-import { gql } from 'apollo-server-express';
-
-export const dashboardTypeDef = gql`
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.dashboardTypeDef = void 0;
+const apollo_server_express_1 = require("apollo-server-express");
+exports.dashboardTypeDef = (0, apollo_server_express_1.gql) `
 
   type DashboardMetrics {
     reservationsTotales: Int!
@@ -44,3 +46,4 @@ export const dashboardTypeDef = gql`
       cancelReservation(id: ID!): ReservationInfo
   }
 `;
+//# sourceMappingURL=typeDefs.js.map

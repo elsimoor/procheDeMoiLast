@@ -13,6 +13,8 @@ const Table_1 = require("./Table");
 const User_1 = require("./User");
 // New client controller providing multi‑tenant support
 const Client_1 = require("./Client");
+const privatisation_1 = require("./privatisation");
+const dashboard_1 = require("./dashboard");
 const All_1 = require("./All");
 const inputs_1 = require("./inputs");
 exports.extendedTypeDefs = (0, apollo_server_express_1.gql) `
@@ -35,6 +37,8 @@ const resolvers = [
     Staff_1.staffResolvers,
     Table_1.tableResolvers,
     Client_1.clientResolvers,
+    privatisation_1.privatisationResolvers,
+    dashboard_1.dashboardResolvers,
 ];
 exports.resolvers = resolvers;
 const typeDefs = [
@@ -49,6 +53,8 @@ const typeDefs = [
     Staff_1.staffTypeDef,
     Table_1.tableTypeDefs,
     Client_1.clientTypeDefs,
+    privatisation_1.privatisationTypeDef,
+    dashboard_1.dashboardTypeDef,
     inputs_1.inputs,
     All_1.root,
 ];

@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql';
 import HotelModel from '../../models/HotelModel';
 import RestaurantModel from '../../models/RestaurantModel';
 import SalonModel from '../../models/SalonModel';
+import ReservationModel from '../../models/ReservationModel';
 
 
 interface Context {
@@ -197,6 +198,46 @@ export const businessResolvers = {
     ): Promise<boolean> => {
       await SalonModel.findByIdAndUpdate(id, { isActive: false });
       return true;
+    },
+
+    createReservationV2: async (
+      _parent,
+      { input }
+    ) => {
+      const { restaurantId, ...reservationData } = input;
+      const reservation = new ReservationModel({
+        ...reservationData,
+        businessId: restaurantId,
+        businessType: "restaurant",
+        partySize: input.personnes,
+        time: input.heure,
+        status: "confirmed", // As per new flow, confirmation is the final step
+      });
+      await reservation.save();
+      // Assuming the Reservation loader can resolve the fields
+      return reservation;
+    },
+
+    createPrivatisationV2: async (
+      _parent,
+      { input }
+    ) => {
+      const { restaurantId, ...privatisationData } = input;
+      // This is a simplified version. A real implementation would need to
+      // block the capacity for the given time slot.
+      const reservation = new ReservationModel({
+        ...privatisationData,
+        businessId: restaurantId,
+        businessType: "restaurant",
+        partySize: input.personnes,
+        time: input.heure,
+        duration: input.dureeHeures,
+        status: "confirmed",
+        notes: `Privatisation: ${privatisationData.type} - ${privatisationData.espace}, Menu: ${privatisationData.menu}`,
+        specialRequests: `Privatisation event for ${input.personnes} guests.`
+      });
+      await reservation.save();
+      return reservation;
     }
   }
 };

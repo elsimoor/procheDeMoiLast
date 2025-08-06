@@ -46,19 +46,8 @@ exports.inputs = (0, apollo_server_express_1.gql) `
     images: [String!]
   }
 
-  input AddressInput {
-    street: String
-    city: String
-    state: String
-    zipCode: String
-    country: String
-  }
 
-  input ContactInput {
-    phone: String
-    email: String
-    website: String
-  }
+
 
   input HotelSettingsInput {
     checkInTime: String
@@ -69,15 +58,7 @@ exports.inputs = (0, apollo_server_express_1.gql) `
     serviceFee: Float
   }
 
-  input RestaurantSettingsInput {
-    currency: String
-    timezone: String
-    taxRate: Float
-    serviceFee: Float
-    maxPartySize: Int
-    reservationWindow: Int
-    cancellationHours: Int
-  }
+
 
   input SalonSettingsInput {
     currency: String
@@ -99,6 +80,8 @@ exports.inputs = (0, apollo_server_express_1.gql) `
     description: String
     included: Boolean!
     category: String
+    price: Float
+
   }
 
   input BusinessServiceInput {
@@ -154,6 +137,7 @@ exports.inputs = (0, apollo_server_express_1.gql) `
     status: String
     features: [String!]
     position: PositionInput
+    images: [String!]
   }
 
   input PositionInput {

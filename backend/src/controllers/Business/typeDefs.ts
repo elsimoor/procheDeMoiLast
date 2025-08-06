@@ -184,6 +184,8 @@ export const businessTypeDef = gql`
 
   extend type Mutation {
     updateRestaurant(id: ID!, input: UpdateRestaurantInput!): Restaurant
+    createReservationV2(input: CreateReservationV2Input!): Reservation!
+    createPrivatisationV2(input: CreatePrivatisationV2Input!): Reservation!
   }
 
   input UpdateRestaurantInput {
