@@ -102,7 +102,7 @@ const reservationSchema = new Schema<ReservationDocument>({
   },
   source: {
     type: String,
-    enum: ['website', 'phone', 'walk-in', 'admin'],
+    enum: ['website', 'phone', 'walk-in', 'admin', 'new-ui'],
     default: 'website'
   }
 }, {
