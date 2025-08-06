@@ -1,126 +1,96 @@
-// index.schema.ts
-import { gql } from 'apollo-server-express';
+import { Resolver, Query, Arg, ID, Mutation } from "type-graphql";
+import { Hotel, HotelModel } from "../models/HotelModel";
+import { HotelInput } from "./inputs";
+import { Restaurant, RestaurantModel } from "../models/RestaurantModel";
+import { RestaurantInput } from "./inputs";
+import { Salon, SalonModel } from "../models/SalonModel";
+import { SalonInput } from "./inputs";
 
+@Resolver()
+export class AllResolver {
+    @Query(() => [Hotel])
+    async hotels(): Promise<Hotel[]> {
+        return await HotelModel.find();
+    }
 
-export const root = gql`
+    @Query(() => Hotel, { nullable: true })
+    async hotel(@Arg("id", () => ID) id: string): Promise<Hotel | null> {
+        return await HotelModel.findById(id);
+    }
 
-  extend type Query {
-    # Auth
+    @Mutation(() => Hotel)
+    async createHotel(@Arg("input") input: HotelInput): Promise<Hotel> {
+        const hotel = new HotelModel(input);
+        await hotel.save();
+        return hotel;
+    }
 
-    # Users
-    users(businessType: String, role: String): [User!]!
-    user(id: ID!): User
+    @Mutation(() => Hotel, { nullable: true })
+    async updateHotel(
+        @Arg("id", () => ID) id: string,
+        @Arg("input") input: HotelInput
+    ): Promise<Hotel | null> {
+        return await HotelModel.findByIdAndUpdate(id, input, { new: true });
+    }
 
-    # Businesses
-    hotels: [Hotel!]!
-    hotel(id: ID!): Hotel
-    restaurants: [Restaurant!]!
-    restaurant(id: ID!): Restaurant
-    salons: [Salon!]!
-    salon(id: ID!): Salon
+    @Query(() => [Restaurant])
+    async restaurants(): Promise<Restaurant[]> {
+        return await RestaurantModel.find();
+    }
 
-    # Reservations
-    reservations(
-      businessId: ID!
-      businessType: String!
-      status: String
-      date: Date
-    ): [Reservation!]!
-    reservation(id: ID!): Reservation
+    @Query(() => Restaurant, { nullable: true })
+    async restaurant(@Arg("id", () => ID) id: string): Promise<Restaurant | null> {
+        return await RestaurantModel.findById(id);
+    }
 
-    # Rooms
-    rooms(hotelId: ID!, status: String): [Room!]!
-    room(id: ID!): Room
+    @Mutation(() => Restaurant)
+    async createRestaurant(@Arg("input") input: RestaurantInput): Promise<Restaurant> {
+        const restaurant = new RestaurantModel(input);
+        await restaurant.save();
+        return restaurant;
+    }
 
-    # Tables
-    tables(restaurantId: ID!, status: String): [Table!]!
-    table(id: ID!): Table
+    @Mutation(() => Restaurant, { nullable: true })
+    async updateRestaurant(
+        @Arg("id", () => ID) id: string,
+        @Arg("input") input: RestaurantInput
+    ): Promise<Restaurant | null> {
+        const { settings, tableCounts, ...rest } = input;
+        const update: any = { ...rest };
 
-    # Services
-    services(
-      businessId: ID!
-      businessType: String!
-      category: String
-    ): [Service!]!
-    service(id: ID!): Service
+        if (settings) {
+            update.settings = settings;
+        }
 
-    # Staff
-    staff(
-      businessId: ID!
-      businessType: String!
-      role: String
-    ): [Staff!]!
-    staffMember(id: ID!): Staff
+        if (tableCounts) {
+            update.tableCounts = tableCounts;
+        }
 
-    # Menu Items
-    menuItems(restaurantId: ID!, category: String): [MenuItem!]!
-    menuItem(id: ID!): MenuItem
+        return await RestaurantModel.findByIdAndUpdate(id, update, { new: true });
+    }
 
-    # Guests
-    guests(
-      businessId: ID!
-      businessType: String!
-      status: String
-    ): [Guest!]!
-    guest(id: ID!): Guest
-  }
+    @Query(() => [Salon])
+    async salons(): Promise<Salon[]> {
+        return await SalonModel.find();
+    }
 
-  extend type Mutation {
-    # Auth
-    register(input: RegisterInput!): AuthPayload!
-    login(input: LoginInput!): AuthPayload!
+    @Query(() => Salon, { nullable: true })
+    async salon(@Arg("id", () => ID) id: string): Promise<Salon | null> {
+        return await SalonModel.findById(id);
+    }
 
-    # Users
-    # Assign a business or update role on a user
-    updateUser(id: ID!, input: UserUpdateInput!): User!
+    @Mutation(() => Salon)
+    async createSalon(@Arg("input") input: SalonInput): Promise<Salon> {
+        const salon = new SalonModel(input);
+        await salon.save();
+        return salon;
+    }
 
-    # Businesses
-    createHotel(input: HotelInput!): Hotel!
-    updateHotel(id: ID!, input: HotelInput!): Hotel!
-    deleteHotel(id: ID!): Boolean!
-
-    createRestaurant(input: RestaurantInput!): Restaurant!
-    updateRestaurant(id: ID!, input: RestaurantInput!): Restaurant!
-    deleteRestaurant(id: ID!): Boolean!
-
-    createSalon(input: SalonInput!): Salon!
-    updateSalon(id: ID!, input: SalonInput!): Salon!
-    deleteSalon(id: ID!): Boolean!
-
-    # Reservations
-    createReservation(input: ReservationInput!): Reservation!
-    updateReservation(id: ID!, input: ReservationInput!): Reservation!
-    deleteReservation(id: ID!): Boolean!
-
-    # Rooms
-    createRoom(input: RoomInput!): Room!
-    updateRoom(id: ID!, input: RoomInput!): Room!
-    deleteRoom(id: ID!): Boolean!
-
-    # Tables
-    createTable(input: TableInput!): Table!
-    updateTable(id: ID!, input: TableInput!): Table!
-    deleteTable(id: ID!): Boolean!
-
-    # Services
-    createService(input: ServiceInput!): Service!
-    updateService(id: ID!, input: ServiceInput!): Service!
-    deleteService(id: ID!): Boolean!
-
-    # Staff
-    createStaff(input: StaffInput!): Staff!
-    updateStaff(id: ID!, input: StaffInput!): Staff!
-    deleteStaff(id: ID!): Boolean!
-
-    # Menu Items
-    createMenuItem(input: MenuItemInput!): MenuItem!
-    updateMenuItem(id: ID!, input: MenuItemInput!): MenuItem!
-    deleteMenuItem(id: ID!): Boolean!
-
-    # Guests
-    createGuest(input: GuestInput!): Guest!
-    updateGuest(id: ID!, input: GuestInput!): Guest!
-    deleteGuest(id: ID!): Boolean!
-  }
-`;
-
+    @Mutation(() => Salon, { nullable: true })
+    async updateSalon(
+        @Arg("id", () => ID) id: string,
+        @Arg("input") input: SalonInput
+    ): Promise<Salon | null> {
+        return await SalonModel.findByIdAndUpdate(id, input, { new: true });
+    }
+}

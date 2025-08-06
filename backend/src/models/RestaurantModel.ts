@@ -13,6 +13,20 @@ interface Policy extends Document {
   category: string;
 }
 
+interface RestaurantSettings {
+    currency: string;
+    timezone: string;
+    taxRate: number;
+    serviceFee: number;
+    maxPartySize: number;
+    reservationWindow: number;
+    cancellationHours: number;
+    openingHours: BusinessHours[];
+    slotFrequencyMinutes: number;
+    maxReservationsPerSlot: number;
+    totalCapacityOverride?: number;
+}
+
 interface RestaurantDocument extends Document {
   name: string;
   description: string;
@@ -28,18 +42,7 @@ interface RestaurantDocument extends Document {
     email: string;
     website: string;
   };
-  settings: {
-    currency: string;
-    timezone: string;
-    taxRate: number;
-    serviceFee: number;
-    maxPartySize: number;
-    reservationWindow: number;
-    cancellationHours: number;
-    slotFrequencyMinutes: number;
-    maxReservationsPerSlot: number;
-    totalCapacityOverride?: number;
-  };
+  settings: RestaurantSettings;
   tableCounts: {
     seats2: number;
     seats4: number;
@@ -86,6 +89,15 @@ const restaurantSchema = new Schema<RestaurantDocument>({
     maxPartySize: { type: Number, default: 10 },
     reservationWindow: { type: Number, default: 60 },
     cancellationHours: { type: Number, default: 2 },
+    openingHours: [{
+        day: {
+            type: String,
+            enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        },
+        isOpen: { type: Boolean, default: true },
+        openTime: String,
+        closeTime: String
+    }],
     slotFrequencyMinutes: { type: Number, default: 15 },
     maxReservationsPerSlot: { type: Number, default: 5 },
     totalCapacityOverride: { type: Number },

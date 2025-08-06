@@ -12,15 +12,19 @@ const GET_RESTAURANT_SETTINGS = gql`
     restaurant(id: $restaurantId) {
       id
       settings {
-        openingHours {
-          day
-          openTime
-          closeTime
-          isOpen
-        }
-        slotFrequencyMinutes
-        maxReservationsPerSlot
-        totalCapacityOverride
+        currency
+        timezone
+        taxRate
+        serviceFee
+        maxPartySize
+        reservationWindow
+        cancellationHours
+      }
+      businessHours {
+        day
+        isOpen
+        openTime
+        closeTime
       }
       tableCounts {
         seats2
@@ -45,10 +49,12 @@ export default function RestaurantTablesPage() {
   const [sessionLoading, setSessionLoading] = useState(true)
   const [sessionError, setSessionError] = useState<string | null>(null)
   const [formData, setFormData] = useState<any>({
-    openingHours: [],
-    slotFrequencyMinutes: 15,
-    maxReservationsPerSlot: 5,
-    totalCapacityOverride: 0,
+    settings: {
+        openingHours: [],
+        slotFrequencyMinutes: 15,
+        maxReservationsPerSlot: 5,
+        totalCapacityOverride: 0,
+    },
     tableCounts: {
       seats2: 0,
       seats4: 0,
@@ -86,11 +92,8 @@ export default function RestaurantTablesPage() {
     onCompleted: (data) => {
       if (data?.restaurant) {
         setFormData({
-          openingHours: data.restaurant.settings.openingHours,
-          slotFrequencyMinutes: data.restaurant.settings.slotFrequencyMinutes,
-          maxReservationsPerSlot: data.restaurant.settings.maxReservationsPerSlot,
-          totalCapacityOverride: data.restaurant.settings.totalCapacityOverride,
-          tableCounts: data.restaurant.tableCounts,
+            settings: data.restaurant.settings,
+            tableCounts: data.restaurant.tableCounts,
         })
       }
     },
@@ -104,11 +107,15 @@ export default function RestaurantTablesPage() {
 
     const input = {
       settings: {
-        openingHours: formData.openingHours,
-        slotFrequencyMinutes: Number(formData.slotFrequencyMinutes),
-        maxReservationsPerSlot: Number(formData.maxReservationsPerSlot),
-        totalCapacityOverride: Number(formData.totalCapacityOverride),
+        currency: formData.settings.currency,
+        timezone: formData.settings.timezone,
+        taxRate: Number(formData.settings.taxRate),
+        serviceFee: Number(formData.settings.serviceFee),
+        maxPartySize: Number(formData.settings.maxPartySize),
+        reservationWindow: Number(formData.settings.reservationWindow),
+        cancellationHours: Number(formData.settings.cancellationHours),
       },
+      businessHours: formData.settings.openingHours,
       tableCounts: {
         seats2: Number(formData.tableCounts.seats2),
         seats4: Number(formData.tableCounts.seats4),
@@ -155,8 +162,8 @@ export default function RestaurantTablesPage() {
             <Input
               id="totalCapacityOverride"
               type="number"
-              value={formData.totalCapacityOverride}
-              onChange={(e) => setFormData({ ...formData, totalCapacityOverride: e.target.value })}
+              value={formData.settings.totalCapacityOverride}
+              onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, totalCapacityOverride: e.target.value } })}
             />
           </CardContent>
         </Card>
@@ -214,8 +221,8 @@ export default function RestaurantTablesPage() {
             <Input
               id="slotFrequencyMinutes"
               type="number"
-              value={formData.slotFrequencyMinutes}
-              onChange={(e) => setFormData({ ...formData, slotFrequencyMinutes: e.target.value })}
+              value={formData.settings.slotFrequencyMinutes}
+              onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, slotFrequencyMinutes: e.target.value } })}
             />
           </CardContent>
         </Card>
@@ -229,8 +236,8 @@ export default function RestaurantTablesPage() {
             <Input
               id="maxReservationsPerSlot"
               type="number"
-              value={formData.maxReservationsPerSlot}
-              onChange={(e) => setFormData({ ...formData, maxReservationsPerSlot: e.target.value })}
+              value={formData.settings.maxReservationsPerSlot}
+              onChange={(e) => setFormData({ ...formData, settings: { ...formData.settings, maxReservationsPerSlot: e.target.value } })}
             />
           </CardContent>
         </Card>
