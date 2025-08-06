@@ -75,8 +75,7 @@ export default function CheckoutPage() {
       await createReservation({
         variables: {
           input: {
-            businessId: booking.hotelId,
-            businessType: "hotel",
+            hotelId: booking.hotelId,
             customerInfo: {
               name: "Guest",
               email: "guest@example.com",
