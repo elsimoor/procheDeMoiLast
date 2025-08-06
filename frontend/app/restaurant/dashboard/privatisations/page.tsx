@@ -14,6 +14,18 @@ import { gql, useQuery, useMutation } from "@apollo/client";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
+const GET_RESTAURANT_SETTINGS = gql`
+  query RestaurantForPrivatisation($id: ID!) {
+    restaurant(id: $id) {
+      id
+      settings {
+        capaciteTheorique
+        frequenceCreneauxMinutes
+      }
+    }
+  }
+`;
+
 const GET_PRIVATISATION_OPTIONS = gql`
   query PrivatisationOptionsByRestaurant($restaurantId: ID!) {
     privatisationOptionsByRestaurant(restaurantId: $restaurantId) {
@@ -56,7 +68,7 @@ const UPDATE_PRIVATISATION_OPTION = gql`
   }
 `;
 
-const formSchema = z.object({
+const baseFormSchema = z.object({
   nom: z.string().min(1, { message: "Le nom est requis." }),
   description: z.string().optional(),
   type: z.string().min(1, { message: "Le type est requis." }),
@@ -65,10 +77,33 @@ const formSchema = z.object({
   menusDeGroupe: z.array(z.string()).optional(),
 });
 
+
 export default function PrivatisationPage() {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [existingOptionId, setExistingOptionId] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
+
+  const { data: restaurantData, loading: settingsLoading } = useQuery(GET_RESTAURANT_SETTINGS, {
+    variables: { id: restaurantId },
+    skip: !restaurantId,
+  });
+  const settings = restaurantData?.restaurant?.settings;
+
+  const formSchema = baseFormSchema
+    .refine(data => {
+        if (!settings) return true; // Don't validate if settings aren't loaded yet
+        return data.capaciteMaximale <= settings.capaciteTheorique;
+    }, {
+        message: `La capacité maximale ne peut pas dépasser la capacité théorique du restaurant (${settings?.capaciteTheorique || 'N/A'}).`,
+        path: ["capaciteMaximale"],
+    })
+    .refine(data => {
+        if (!settings || !settings.frequenceCreneauxMinutes) return true;
+        return (data.dureeMaximaleHeures * 60) % settings.frequenceCreneauxMinutes === 0;
+    }, {
+        message: `La durée doit être compatible avec les créneaux de ${settings?.frequenceCreneauxMinutes || 'N/A'} minutes.`,
+        path: ["dureeMaximaleHeures"],
+    });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -164,7 +199,7 @@ export default function PrivatisationPage() {
 
   const menuItems = ["Menu A (3 plats)", "Menu B (4 plats)", "Menu C (5 plats)"];
 
-  if (sessionLoading || queryLoading) {
+  if (sessionLoading || queryLoading || settingsLoading) {
     return <div className="p-6">Loading...</div>;
   }
 
@@ -311,7 +346,7 @@ export default function PrivatisationPage() {
               </Card>
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={createLoading || updateLoading} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 py-2">
+                <Button type="submit" disabled={createLoading || updateLoading || settingsLoading} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-200 ease-in-out">
                   {createLoading || updateLoading ? 'Enregistrement...' : 'Enregistrer les modifications'}
                 </Button>
               </div>
