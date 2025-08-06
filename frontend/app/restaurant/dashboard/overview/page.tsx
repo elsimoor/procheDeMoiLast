@@ -117,7 +117,7 @@ export default function RestaurantOverviewPage() {
   const { data: reservationsData, loading: reservationsLoading, refetch: refetchReservations } = useQuery(GET_RESERVATIONS_BY_DATE, {
     variables: {
         restaurantId,
-        date: moment(selectedDate).format("YYYY-MM-DD"),
+        date: moment.utc(selectedDate).format("YYYY-MM-DD"),
     },
     skip: !restaurantId || !selectedDate,
   });
@@ -201,7 +201,7 @@ export default function RestaurantOverviewPage() {
   }
 
   function CustomDayContent(props: DayContentProps) {
-    const isBooked = bookedDays.some(d => moment(d).isSame(props.date, 'day'));
+    const isBooked = bookedDays.some(d => moment.utc(d).isSame(moment.utc(props.date), 'day'));
     return (
       <div className="relative">
         <DayContent {...props} />
@@ -285,7 +285,7 @@ export default function RestaurantOverviewPage() {
               ) : (
                 paginatedReservations.map((res: any) => (
                   <TableRow key={res.id}>
-                    <TableCell className="font-medium">{moment(res.date).format("DD/MM/YYYY")}</TableCell>
+                    <TableCell className="font-medium">{moment.utc(res.date).format("DD/MM/YYYY")}</TableCell>
                     <TableCell>{res.heure}</TableCell>
                     <TableCell>{res.restaurant}</TableCell>
                     <TableCell>{res.personnes}</TableCell>
