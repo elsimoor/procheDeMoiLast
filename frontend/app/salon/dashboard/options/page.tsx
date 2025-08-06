@@ -25,7 +25,6 @@ interface Service {
  */
 export default function SalonOptions() {
   const [salonId, setSalonId] = useState<string | null>(null)
-  const [businessType, setBusinessType] = useState<string | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
   const [sessionError, setSessionError] = useState<string | null>(null)
 
@@ -50,9 +49,8 @@ export default function SalonOptions() {
           return
         }
         const data = await res.json()
-        if (data.businessType && data.businessType.toLowerCase() === "salon" && data.businessId) {
-          setSalonId(data.businessId)
-          setBusinessType(data.businessType.toLowerCase())
+        if (data.salonId) {
+          setSalonId(data.salonId)
         } else {
           setSessionError("You are not associated with a salon business.")
         }
@@ -67,8 +65,8 @@ export default function SalonOptions() {
 
   // GraphQL queries/mutations
   const GET_SERVICES = gql`
-    query GetServices($businessId: ID!, $businessType: String!) {
-      services(businessId: $businessId, businessType: $businessType) {
+    query GetServices($salonId: ID!) {
+      services(salonId: $salonId) {
         id
         name
         description
@@ -104,8 +102,8 @@ export default function SalonOptions() {
     error: servicesError,
     refetch,
   } = useQuery(GET_SERVICES, {
-    variables: { businessId: salonId, businessType },
-    skip: !salonId || !businessType,
+    variables: { salonId },
+    skip: !salonId,
   })
   const [updateService] = useMutation(UPDATE_SERVICE, {
     onCompleted: () => refetch(),
@@ -144,8 +142,7 @@ export default function SalonOptions() {
       // by the ServiceInput GraphQL type (name, price, businessId, businessType, etc.), so we
       // ensure they are included.  Additional arrays like requirements are sent empty.
       const input: any = {
-        businessId: salonId,
-        businessType: businessType || "salon",
+        salonId: salonId,
         name: svc.name,
         description: (svc as any).description || "",
         category: (svc as any).category || "other",
@@ -185,8 +182,7 @@ export default function SalonOptions() {
     try {
       // Build full input similar to handleAddOption
       const input: any = {
-        businessId: salonId,
-        businessType: businessType || "salon",
+        salonId: salonId,
         name: svc.name,
         description: (svc as any).description || "",
         category: (svc as any).category || "other",

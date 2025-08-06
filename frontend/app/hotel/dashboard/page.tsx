@@ -39,8 +39,8 @@ const GET_ROOMS = gql`
 // Query to fetch all reservations for a business (hotel).  We fetch
 // enough fields to compute metrics and render the reservations table.
 const GET_RESERVATIONS = gql`
-  query GetReservations($businessId: ID!, $businessType: String!) {
-    reservations(businessId: $businessId, businessType: $businessType) {
+  query GetReservations($hotelId: ID!) {
+    reservations(hotelId: $hotelId) {
       id
       customerInfo {
         name
@@ -97,7 +97,6 @@ export default function HotelDashboardPage() {
   // either the session is still loading or the user is not associated
   // with a hotel account.
   const [hotelId, setHotelId] = useState<string | null>(null);
-  const [businessType, setBusinessType] = useState<string | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
@@ -110,9 +109,8 @@ export default function HotelDashboardPage() {
           return;
         }
         const data = await res.json();
-        if (data.businessType && data.businessType.toLowerCase() === "hotel" && data.businessId) {
-          setHotelId(data.businessId);
-          setBusinessType(data.businessType);
+        if (data.hotelId) {
+          setHotelId(data.hotelId);
         } else {
           setSessionError("You are not associated with a hotel business.");
         }
@@ -141,8 +139,8 @@ export default function HotelDashboardPage() {
     loading: reservationsLoading,
     error: reservationsError,
   } = useQuery(GET_RESERVATIONS, {
-    variables: { businessId: hotelId, businessType },
-    skip: !hotelId || !businessType,
+    variables: { hotelId },
+    skip: !hotelId,
   });
 
   // Compute statistics once data is loaded.  useMemo avoids

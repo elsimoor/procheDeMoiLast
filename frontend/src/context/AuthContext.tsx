@@ -100,8 +100,9 @@ interface User {
   email: string
   fullName: string
   role: string
-  businessType?: string
-  businessId?: string
+  restaurantId?: string
+  hotelId?: string
+  salonId?: string
   phone?: string
   avatar?: string
   preferences?: {

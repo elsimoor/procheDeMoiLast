@@ -38,7 +38,6 @@ export default function SalonClients() {
 
   // Session state for salon context
   const [salonId, setSalonId] = useState<string | null>(null)
-  const [businessType, setBusinessType] = useState<string | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
   const [sessionError, setSessionError] = useState<string | null>(null)
 
@@ -51,9 +50,8 @@ export default function SalonClients() {
           return
         }
         const data = await res.json()
-        if (data.businessType && data.businessType.toLowerCase() === "salon" && data.businessId) {
-          setSalonId(data.businessId)
-          setBusinessType(data.businessType.toLowerCase())
+        if (data.salonId) {
+          setSalonId(data.salonId)
         } else {
           setSessionError("You are not associated with a salon business.")
         }
@@ -68,8 +66,8 @@ export default function SalonClients() {
 
   // Fetch reservations to compute client data
   const GET_RESERVATIONS = gql`
-    query GetReservations($businessId: ID!, $businessType: String!) {
-      reservations(businessId: $businessId, businessType: $businessType) {
+    query GetReservations($salonId: ID!) {
+      reservations(salonId: $salonId) {
         id
         customerInfo {
           name
@@ -93,8 +91,8 @@ export default function SalonClients() {
   `
 
   const { data: reservationsData, loading: reservationsLoading, error: reservationsError } = useQuery(GET_RESERVATIONS, {
-    variables: { businessId: salonId, businessType },
-    skip: !salonId || !businessType,
+    variables: { salonId },
+    skip: !salonId,
   })
 
   // Compute clients whenever reservations change
