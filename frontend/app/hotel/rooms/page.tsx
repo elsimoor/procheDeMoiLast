@@ -202,55 +202,47 @@ export default function RoomsListPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 bg-white z-10 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <span className="font-bold text-2xl text-gray-900">StayEase</span>
-            </div>
-            <nav className="hidden md:flex space-x-8 text-sm font-medium text-gray-700">
-              <a href="#" className="hover:text-blue-600 transition-colors">Explore</a>
-              <a href="#" className="hover:text-blue-600 transition-colors">Wishlists</a>
-              <a href="#" className="hover:text-blue-600 transition-colors">Trips</a>
-              <a href="#" className="hover:text-blue-600 transition-colors">Messages</a>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <a href="/login" className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
-                Log in
-              </a>
-            </div>
+      <header className="border-b border-gray-200 py-4 px-6 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <span className="font-bold text-xl text-gray-900">StayEase</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <a
+            href="/login"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            Log in
+          </a>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <div className="flex space-x-8 border-b">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-3 px-1 text-sm font-medium transition-colors ${
-                  activeTab === tab
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+      <main className="max-w-4xl mx-auto px-4 py-12">
+        <div className="flex space-x-4 border-b mb-4">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`py-2 px-4 ${
+                activeTab === tab
+                  ? "text-blue-600 border-b-2 border-blue-600 font-semibold"
+                  : "text-gray-500"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
-
         {activeTab === "Hotels" && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Découvrez nos hotels</h2>
-            <div className="flex flex-wrap gap-3 mt-4">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">Découvrez nos hotels</h2>
+            <div className="flex space-x-2 mt-2">
               {hotelFilterOptions.map((filter) => (
                 <button
                   key={filter}
                   onClick={() => handleFilterChange(filter)}
-                  className={`px-4 py-2 text-sm font-medium border rounded-full transition-colors ${
+                  className={`px-4 py-2 text-sm border rounded-full ${
                     hotelFilters.includes(filter)
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                      ? "bg-blue-600 text-white"
+                      : ""
                   }`}
                 >
                   {filter}
@@ -259,15 +251,12 @@ export default function RoomsListPage() {
             </div>
           </div>
         )}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Chambres disponibles</h1>
-          {countData && (
-            <p className="text-gray-600">
-              {countData.availableRoomsCount} chambre(s) disponible(s)
-            </p>
-          )}
-        </div>
-
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Chambres disponibles</h1>
+        {countData && (
+          <p className="text-gray-600 mb-6">
+            {countData.availableRoomsCount} chambre(s) disponible(s)
+          </p>
+        )}
         {roomsLoading || hotelsLoading ? (
           <p>Loading rooms…</p>
         ) : roomsError || hotelsError ? (
@@ -276,77 +265,80 @@ export default function RoomsListPage() {
           <p>No rooms available for the selected dates.</p>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="space-y-6">
               {paginatedRooms.map((room: any) => (
                 <div
                   key={room.roomId}
-                  className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+                  className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
                   onClick={() => handleSelect(room.roomId)}
                 >
-                  {room.image ? (
-                    <img
-                      src={room.image}
-                      alt={room.type}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200"></div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {room.type}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4 h-10 overflow-hidden">
-                      {room.description || 'No description available.'}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-bold text-blue-600">
-                        {room.price}€/nuit
-                      </span>
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
-                        Select
-                      </button>
+                  <div className="flex items-start space-x-4">
+                    {room.image ? (
+                      <img
+                        src={room.image}
+                        alt={room.type}
+                        className="w-28 h-20 object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-28 h-20 bg-gray-200 rounded"></div>
+                    )}
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-1">
+                        {room.type}
+                      </h3>
+                      {room.features && room.features.length > 0 ? (
+                        <p className="text-sm text-gray-600">
+                          {room.features.slice(0, 3).join(", ")}
+                        </p>
+                      ) : (
+                        room.amenities &&
+                        room.amenities.length > 0 && (
+                          <p className="text-sm text-gray-600">
+                            {room.amenities.slice(0, 3).join(", ")}
+                          </p>
+                        )
+                      )}
                     </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-base font-bold text-gray-900">
+                      {room.price}€/nuit
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="flex justify-center items-center mt-12 space-x-4">
+            <div className="flex justify-center items-center mt-8 space-x-4">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 bg-white border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 border rounded-md disabled:opacity-50"
               >
                 Previous
               </button>
-              <span className="text-sm text-gray-700">
+              <span>
                 Page {currentPage} of {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-white border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 border rounded-md disabled:opacity-50"
               >
                 Next
               </button>
             </div>
           </>
         )}
-        <div className="mt-12 text-center">
+        <div className="mt-8 text-center">
           <button
             type="button"
             onClick={() => router.push("/hotel/search")}
-            className="text-blue-600 hover:underline"
+            className="text-blue-600 hover:text-blue-500"
           >
             ← Modifier la recherche
           </button>
         </div>
       </main>
-      <footer className="w-full bg-gray-100 mt-16 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-          <p>&copy; {new Date().getFullYear()} StayEase. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }

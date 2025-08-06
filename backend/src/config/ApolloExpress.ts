@@ -1,15 +1,91 @@
-import { ApolloServer } from 'apollo-server-express';
-import { buildSchema } from 'type-graphql';
-import { resolvers } from '../controllers';
+import { ApolloServer } from "apollo-server-express";
+import http from "http";
+import express, { Application, Request, Response } from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import DataLoader from "dataloader";
+import { resolvers, typeDefs } from "../controllers";
+import {
+  notFound,
+  BatchUsers,
+  BatchBusiness,
+  BatchRoom,
+  BatchTable,
+  BatchService,
+  BatchUStaff,
+} from "../middlewares";
 
-export const createApolloServer = async () => {
-  const schema = await buildSchema({
+
+
+const { PORT, MONGO_URI } = process.env;
+
+const app = express();
+
+const startServer = async (app: Application) => {
+  //? Middlewares
+  app.use(express.json());
+  app.use(
+    cors({
+      origin: "*",
+      methods: ["GET", "POST"],
+      credentials: true, // enable set cookie from server
+    })
+  );
+
+
+  app.get("/hello", (_: Request, res: Response) => {
+    res.json({
+      message: "hello ❤",
+    });
+  });
+
+
+  const server = new ApolloServer({
     resolvers,
-    validate: false,
+    typeDefs,
+    playground: process.env.NODE_ENV == "development",
+    introspection: process.env.NODE_ENV == "development",
+    context: async ({ req }) => {
+      return {
+        Loaders: {
+          user: new DataLoader((keys) => BatchUsers(keys)),
+          business: new DataLoader((keys) => BatchBusiness(keys)),
+          room: new DataLoader((keys) => BatchRoom(keys)),
+          table: new DataLoader((keys) => BatchTable(keys)),
+          service: new DataLoader((keys) => BatchService(keys)),
+          staff: new DataLoader((keys) => BatchUStaff(keys)),
+        },
+        //@ts-ignore
+        req,
+        // pubsub,
+      };
+    },
+  });
+  server.applyMiddleware({
+    app,
+    path: "/procheDeMoi",
   });
 
-  return new ApolloServer({
-    schema,
-    context: ({ req, res }) => ({ req, res }),
-  });
+  const httpServer = http.createServer(app);
+  server.installSubscriptionHandlers(httpServer);
+
+  //? 404 and error handling
+  app.use(notFound);
+
+  mongoose
+    .connect(MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => {
+      httpServer.listen(PORT || 5000);
+      console.log(
+        `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
+      );
+    })
+    .catch((err: any) => {
+      console.error(err);
+    });
 };
+
+export { app, startServer };

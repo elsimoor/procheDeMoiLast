@@ -2,39 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { gql, useQuery, useMutation } from "@apollo/client";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 /**
  * Reservation management page for hotel businesses.  This page allows the
@@ -189,8 +156,6 @@ const [updateReservation] = useMutation(UPDATE_RESERVATION);
     status: "pending",
   });
   const [showForm, setShowForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
 
   const resetForm = () => {
     setFormState({
@@ -280,183 +245,190 @@ const [updateReservation] = useMutation(UPDATE_RESERVATION);
   if (reservationsError) return <p>Error loading reservations.</p>;
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Reservations</h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition-colors"
-        >
-          New Reservation
-        </button>
-      </div>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold mb-4">Reservations</h1>
 
       {/* List of reservations */}
-      <section className="bg-white p-6 rounded-lg shadow">
-        <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center space-x-4">
-                <Input
-                    placeholder="Search by name or email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="max-w-sm"
-                />
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Filter by status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="confirmed">Confirmed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+      <section className="space-y-2">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Existing Reservations</h2>
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            New Reservation
+          </button>
         </div>
         {reservationsData?.reservations && reservationsData.reservations.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Guest</TableHead>
-                <TableHead>Room</TableHead>
-                <TableHead>Check-In</TableHead>
-                <TableHead>Check-Out</TableHead>
-                <TableHead>Guests</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead><span className="sr-only">Actions</span></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {reservationsData.reservations
-                .filter((res: any) => {
-                    const searchTermLower = searchTerm.toLowerCase();
-                    const guestName = res.customerInfo?.name?.toLowerCase() || '';
-                    const guestEmail = res.customerInfo?.email?.toLowerCase() || '';
-                    return (guestName.includes(searchTermLower) || guestEmail.includes(searchTermLower)) &&
-                           (statusFilter === 'all' || res.status === statusFilter);
-                })
-                .map((res: any) => (
-                <TableRow key={res.id}>
-                  <TableCell className="font-medium">{res.customerInfo?.name}</TableCell>
-                  <TableCell>{res.roomId?.number || "N/A"}</TableCell>
-                  <TableCell>{res.checkIn ? new Date(res.checkIn).toLocaleDateString() : "N/A"}</TableCell>
-                  <TableCell>{res.checkOut ? new Date(res.checkOut).toLocaleDateString() : "N/A"}</TableCell>
-                  <TableCell>{res.guests}</TableCell>
-                  <TableCell>${res.totalAmount?.toFixed(2) ?? "0.00"}</TableCell>
-                  <TableCell>
-                    <Badge variant={res.status === 'confirmed' ? 'default' : res.status === 'pending' ? 'secondary' : 'destructive'}>
-                      {res.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleStatusChange(res, 'confirmed')}>Confirm</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(res, 'pending')}>Set to Pending</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleStatusChange(res, 'cancelled')}>Cancel</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(res.id)} className="text-red-600">
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 text-left text-sm font-medium">Guest</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Room</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Check‑In</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Check‑Out</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Guests</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Amount</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Status</th>
+                <th className="px-4 py-2 text-left text-sm font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reservationsData.reservations.map((res: any) => (
+                <tr key={res.id} className="border-t">
+                  <td className="px-4 py-2">{res.customerInfo?.name}</td>
+                  <td className="px-4 py-2">{res.roomId?.number || ""}</td>
+                  <td className="px-4 py-2">{res.checkIn ? new Date(res.checkIn).toLocaleDateString() : ""}</td>
+                  <td className="px-4 py-2">{res.checkOut ? new Date(res.checkOut).toLocaleDateString() : ""}</td>
+                  <td className="px-4 py-2">{res.guests}</td>
+                  <td className="px-4 py-2">{res.totalAmount ?? ""}</td>
+                  <td className="px-4 py-2 capitalize">
+                    <select
+                      value={res.status}
+                      onChange={(e) => handleStatusChange(res, e.target.value)}
+                      className="border rounded px-2 py-1 text-sm capitalize"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </td>
+                  <td className="px-4 py-2 space-x-2">
+                    <button
+                      className="px-2 py-1 text-sm bg-red-500 text-white rounded"
+                      onClick={() => handleDelete(res.id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         ) : (
           <p>No reservations found.</p>
         )}
       </section>
 
       {/* Form for creating a new reservation */}
-      <Sheet open={showForm} onOpenChange={setShowForm}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>New Reservation</SheetTitle>
-          </SheetHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 mt-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="guestName">Guest Name</Label>
-                <Input id="guestName" value={formState.guestName} onChange={(e) => setFormState({ ...formState, guestName: e.target.value })} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="guestEmail">Guest Email</Label>
-                <Input id="guestEmail" type="email" value={formState.guestEmail} onChange={(e) => setFormState({ ...formState, guestEmail: e.target.value })} required />
-              </div>
+      {showForm && (
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold">New Reservation</h2>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium">Guest Name</label>
+              <input
+                type="text"
+                value={formState.guestName}
+                onChange={(e) => setFormState({ ...formState, guestName: e.target.value })}
+                className="w-full p-2 border rounded"
+                required
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="guestPhone">Guest Phone</Label>
-              <Input id="guestPhone" value={formState.guestPhone} onChange={(e) => setFormState({ ...formState, guestPhone: e.target.value })} />
+            <div>
+              <label className="block text-sm font-medium">Guest Email</label>
+              <input
+                type="email"
+                value={formState.guestEmail}
+                onChange={(e) => setFormState({ ...formState, guestEmail: e.target.value })}
+                className="w-full p-2 border rounded"
+                required
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="roomId">Room</Label>
-              <Select value={formState.roomId} onValueChange={(value) => setFormState({ ...formState, roomId: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a room" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roomsData?.rooms?.map((room: any) => (
-                    <SelectItem key={room.id} value={room.id}>
-                      {room.number} ({room.type})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div>
+              <label className="block text-sm font-medium">Guest Phone</label>
+              <input
+                type="text"
+                value={formState.guestPhone}
+                onChange={(e) => setFormState({ ...formState, guestPhone: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="checkIn">Check-In Date</Label>
-                <Input id="checkIn" type="date" value={formState.checkIn} onChange={(e) => setFormState({ ...formState, checkIn: e.target.value })} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="checkOut">Check-Out Date</Label>
-                <Input id="checkOut" type="date" value={formState.checkOut} onChange={(e) => setFormState({ ...formState, checkOut: e.target.value })} required />
-              </div>
+            <div>
+              <label className="block text-sm font-medium">Room</label>
+              <select
+                value={formState.roomId}
+                onChange={(e) => setFormState({ ...formState, roomId: e.target.value })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Select a room</option>
+                {roomsData?.rooms?.map((room: any) => (
+                  <option key={room.id} value={room.id}>
+                    {room.number} ({room.type})
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="guests">Guests</Label>
-                <Input id="guests" type="number" value={formState.guests} onChange={(e) => setFormState({ ...formState, guests: e.target.value === "" ? "" : Number(e.target.value) })} min={1} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="totalAmount">Total Amount</Label>
-                <Input id="totalAmount" type="number" value={formState.totalAmount} onChange={(e) => setFormState({ ...formState, totalAmount: e.target.value === "" ? "" : Number(e.target.value) })} min={0} />
-              </div>
+            <div>
+              <label className="block text-sm font-medium">Check‑In Date</label>
+              <input
+                type="date"
+                value={formState.checkIn}
+                onChange={(e) => setFormState({ ...formState, checkIn: e.target.value })}
+                className="w-full p-2 border rounded"
+                required
+              />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select value={formState.status} onValueChange={(value) => setFormState({ ...formState, status: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
+            <div>
+              <label className="block text-sm font-medium">Check‑Out Date</label>
+              <input
+                type="date"
+                value={formState.checkOut}
+                onChange={(e) => setFormState({ ...formState, checkOut: e.target.value })}
+                className="w-full p-2 border rounded"
+                required
+              />
             </div>
-            <div className="flex justify-end space-x-4">
-              <Button type="button" variant="outline" onClick={resetForm}>
-                Cancel
-              </Button>
-              <Button type="submit">
+            <div>
+              <label className="block text-sm font-medium">Guests</label>
+              <input
+                type="number"
+                value={formState.guests}
+                onChange={(e) => setFormState({ ...formState, guests: e.target.value === "" ? "" : Number(e.target.value) })}
+                className="w-full p-2 border rounded"
+                min={1}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Total Amount</label>
+              <input
+                type="number"
+                value={formState.totalAmount}
+                onChange={(e) => setFormState({ ...formState, totalAmount: e.target.value === "" ? "" : Number(e.target.value) })}
+                className="w-full p-2 border rounded"
+                min={0}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Status</label>
+              <select
+                value={formState.status}
+                onChange={(e) => setFormState({ ...formState, status: e.target.value })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-500 text-white rounded"
+              >
                 Create Reservation
-              </Button>
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="ml-2 px-4 py-2 bg-gray-300 text-gray-700 rounded"
+              >
+                Cancel
+              </button>
             </div>
           </form>
-        </SheetContent>
-      </Sheet>
+        </section>
+      )}
     </div>
   );
 }

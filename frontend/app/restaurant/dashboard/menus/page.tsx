@@ -5,8 +5,6 @@ import type React from "react"
 import { useState, useEffect, useMemo } from "react"
 import { Plus, Edit, Trash2, Search, Filter, DollarSign, Clock, Star, UtensilsCrossed, X } from "lucide-react"
 import { gql, useQuery, useMutation } from "@apollo/client"
-import { ImageUpload } from "@/components/ui/ImageUpload"
-import { uploadImage } from "@/lib/firebase"
 
 interface MenuItem {
   id: string
@@ -26,7 +24,6 @@ export default function RestaurantMenus() {
   const [searchTerm, setSearchTerm] = useState("")
   const [showModal, setShowModal] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
-  const [uploading, setUploading] = useState(false)
 
   // Fetch the current session to determine the restaurant context.  We
   // derive the restaurantId and businessType from the session so that
@@ -107,7 +104,7 @@ export default function RestaurantMenus() {
   const [deleteMenuItem] = useMutation(DELETE_MENU_ITEM)
 
   // Local form state
-  const [formData, setFormData] = useState<Partial<MenuItem>>({
+  const [formData, setFormData] = useState<Partial<MenuItem & { image?: string }>>({
     name: "",
     description: "",
     price: 0,
@@ -116,7 +113,7 @@ export default function RestaurantMenus() {
     popular: false,
     prepTime: 10,
     allergens: [],
-    images: [],
+    image: "",
   })
 
   // Compute categories dynamically based on loaded menu items
@@ -174,7 +171,7 @@ export default function RestaurantMenus() {
               spiceLevel: "mild",
               ingredients: [],
               nutritionalInfo: null,
-              images: formData.images,
+              images: formData.image ? [formData.image] : [],
             },
           },
         })
@@ -195,7 +192,7 @@ export default function RestaurantMenus() {
               spiceLevel: "mild",
               ingredients: [],
               nutritionalInfo: null,
-              images: formData.images,
+              images: formData.image ? [formData.image] : [],
             },
           },
         })
@@ -220,7 +217,7 @@ export default function RestaurantMenus() {
       popular: false,
       prepTime: 10,
       allergens: [],
-      images: [],
+      image: "",
     })
   }
 
@@ -235,7 +232,7 @@ export default function RestaurantMenus() {
       popular: item.popular,
       prepTime: item.prepTime || 10,
       allergens: item.allergens || [],
-      images: item.images || [],
+      image: item.images?.length ? item.images[0] : "",
     })
     setShowModal(true)
   }
@@ -248,19 +245,6 @@ export default function RestaurantMenus() {
     } catch (err) {
       console.error(err)
       alert("Failed to delete menu item")
-    }
-  }
-
-  const handleImageUpload = async (files: File[]) => {
-    setUploading(true)
-    try {
-      const urls = await Promise.all(files.map(uploadImage))
-      setFormData({ ...formData, images: [...(formData.images || []), ...urls] })
-    } catch (err) {
-      console.error(err)
-      alert("Failed to upload image")
-    } finally {
-      setUploading(false)
     }
   }
 
@@ -571,23 +555,14 @@ export default function RestaurantMenus() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
-                  <ImageUpload onUpload={handleImageUpload} uploading={uploading} multiple />
-                  <div className="mt-4 flex flex-wrap gap-4">
-                    {formData.images?.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img src={image} alt="Menu item image" className="w-32 h-32 object-cover rounded-lg" />
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, images: formData.images?.filter((_, i) => i !== index) })}
-                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                  <input
+                    type="url"
+                    value={formData.image || ""}
+                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
                 </div>
                 <div className="flex items-center space-x-4">
                   <label className="flex items-center">

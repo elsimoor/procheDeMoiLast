@@ -1,96 +1,125 @@
-import { Resolver, Query, Arg, ID, Mutation } from "type-graphql";
-import { Hotel, HotelModel } from "../models/HotelModel";
-import { HotelInput } from "./inputs";
-import { Restaurant, RestaurantModel } from "../models/RestaurantModel";
-import { RestaurantInput } from "./inputs";
-import { Salon, SalonModel } from "../models/SalonModel";
-import { SalonInput } from "./inputs";
+// index.schema.ts
+import { gql } from 'apollo-server-express';
 
-@Resolver()
-export class AllResolver {
-    @Query(() => [Hotel])
-    async hotels(): Promise<Hotel[]> {
-        return await HotelModel.find();
-    }
 
-    @Query(() => Hotel, { nullable: true })
-    async hotel(@Arg("id", () => ID) id: string): Promise<Hotel | null> {
-        return await HotelModel.findById(id);
-    }
+export const root = gql`
 
-    @Mutation(() => Hotel)
-    async createHotel(@Arg("input") input: HotelInput): Promise<Hotel> {
-        const hotel = new HotelModel(input);
-        await hotel.save();
-        return hotel;
-    }
+  extend type Query {
+    # Auth
 
-    @Mutation(() => Hotel, { nullable: true })
-    async updateHotel(
-        @Arg("id", () => ID) id: string,
-        @Arg("input") input: HotelInput
-    ): Promise<Hotel | null> {
-        return await HotelModel.findByIdAndUpdate(id, input, { new: true });
-    }
+    # Users
+    users(businessType: String, role: String): [User!]!
+    user(id: ID!): User
 
-    @Query(() => [Restaurant])
-    async restaurants(): Promise<Restaurant[]> {
-        return await RestaurantModel.find();
-    }
+    # Businesses
+    hotels: [Hotel!]!
+    hotel(id: ID!): Hotel
+    restaurants: [Restaurant!]!
+    restaurant(id: ID!): Restaurant
+    salons: [Salon!]!
+    salon(id: ID!): Salon
 
-    @Query(() => Restaurant, { nullable: true })
-    async restaurant(@Arg("id", () => ID) id: string): Promise<Restaurant | null> {
-        return await RestaurantModel.findById(id);
-    }
+    # Reservations
+    reservations(
+      businessId: ID!
+      businessType: String!
+      status: String
+      date: Date
+    ): [Reservation!]!
+    reservation(id: ID!): Reservation
 
-    @Mutation(() => Restaurant)
-    async createRestaurant(@Arg("input") input: RestaurantInput): Promise<Restaurant> {
-        const restaurant = new RestaurantModel(input);
-        await restaurant.save();
-        return restaurant;
-    }
+    # Rooms
+    rooms(hotelId: ID!, status: String): [Room!]!
+    room(id: ID!): Room
 
-    @Mutation(() => Restaurant, { nullable: true })
-    async updateRestaurant(
-        @Arg("id", () => ID) id: string,
-        @Arg("input") input: RestaurantInput
-    ): Promise<Restaurant | null> {
-        const { settings, tableCounts, ...rest } = input;
-        const update: any = { ...rest };
+    # Tables
+    tables(restaurantId: ID!, status: String): [Table!]!
+    table(id: ID!): Table
 
-        if (settings) {
-            update.settings = settings;
-        }
+    # Services
+    services(
+      businessId: ID!
+      businessType: String!
+      category: String
+    ): [Service!]!
+    service(id: ID!): Service
 
-        if (tableCounts) {
-            update.tableCounts = tableCounts;
-        }
+    # Staff
+    staff(
+      businessId: ID!
+      businessType: String!
+      role: String
+    ): [Staff!]!
+    staffMember(id: ID!): Staff
 
-        return await RestaurantModel.findByIdAndUpdate(id, update, { new: true });
-    }
+    # Menu Items
+    menuItems(restaurantId: ID!, category: String): [MenuItem!]!
+    menuItem(id: ID!): MenuItem
 
-    @Query(() => [Salon])
-    async salons(): Promise<Salon[]> {
-        return await SalonModel.find();
-    }
+    # Guests
+    guests(
+      businessId: ID!
+      businessType: String!
+      status: String
+    ): [Guest!]!
+    guest(id: ID!): Guest
+  }
 
-    @Query(() => Salon, { nullable: true })
-    async salon(@Arg("id", () => ID) id: string): Promise<Salon | null> {
-        return await SalonModel.findById(id);
-    }
+  extend type Mutation {
+    # Auth
+    register(input: RegisterInput!): AuthPayload!
+    login(input: LoginInput!): AuthPayload!
 
-    @Mutation(() => Salon)
-    async createSalon(@Arg("input") input: SalonInput): Promise<Salon> {
-        const salon = new SalonModel(input);
-        await salon.save();
-        return salon;
-    }
+    # Users
+    # Assign a business or update role on a user
+    updateUser(id: ID!, input: UserUpdateInput!): User!
 
-    @Mutation(() => Salon, { nullable: true })
-    async updateSalon(
-        @Arg("id", () => ID) id: string,
-        @Arg("input") input: SalonInput
-    ): Promise<Salon | null> {
-        return await SalonModel.findByIdAndUpdate(id, input, { new: true });
-    }
-}
+    # Businesses
+    createHotel(input: HotelInput!): Hotel!
+    updateHotel(id: ID!, input: HotelInput!): Hotel!
+    deleteHotel(id: ID!): Boolean!
+
+    createRestaurant(input: RestaurantInput!): Restaurant!
+    updateRestaurant(id: ID!, input: RestaurantInput!): Restaurant!
+    deleteRestaurant(id: ID!): Boolean!
+
+    createSalon(input: SalonInput!): Salon!
+    updateSalon(id: ID!, input: SalonInput!): Salon!
+    deleteSalon(id: ID!): Boolean!
+
+    # Reservations
+    createReservation(input: ReservationInput!): Reservation!
+    updateReservation(id: ID!, input: ReservationInput!): Reservation!
+    deleteReservation(id: ID!): Boolean!
+
+    # Rooms
+    createRoom(input: RoomInput!): Room!
+    updateRoom(id: ID!, input: RoomInput!): Room!
+    deleteRoom(id: ID!): Boolean!
+
+    # Tables
+    createTable(input: TableInput!): Table!
+    updateTable(id: ID!, input: TableInput!): Table!
+    deleteTable(id: ID!): Boolean!
+
+    # Services
+    createService(input: ServiceInput!): Service!
+    updateService(id: ID!, input: ServiceInput!): Service!
+    deleteService(id: ID!): Boolean!
+
+    # Staff
+    createStaff(input: StaffInput!): Staff!
+    updateStaff(id: ID!, input: StaffInput!): Staff!
+    deleteStaff(id: ID!): Boolean!
+
+    # Menu Items
+    createMenuItem(input: MenuItemInput!): MenuItem!
+    updateMenuItem(id: ID!, input: MenuItemInput!): MenuItem!
+    deleteMenuItem(id: ID!): Boolean!
+
+    # Guests
+    createGuest(input: GuestInput!): Guest!
+    updateGuest(id: ID!, input: GuestInput!): Guest!
+    deleteGuest(id: ID!): Boolean!
+  }
+`;

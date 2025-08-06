@@ -30,6 +30,14 @@ export const inputs = gql`
     features: [String!]
     policies: [PolicyInput!]
     images: [String!]
+    tableCounts: TableCountsInput
+  }
+
+  input TableCountsInput {
+    seats2: Int
+    seats4: Int
+    seats6: Int
+    seats8: Int
   }
 
   input SalonInput {
@@ -75,6 +83,9 @@ export const inputs = gql`
     maxPartySize: Int
     reservationWindow: Int
     cancellationHours: Int
+    slotFrequencyMinutes: Int
+    maxReservationsPerSlot: Int
+    totalCapacityOverride: Int
   }
 
   input SalonSettingsInput {
@@ -154,7 +165,6 @@ export const inputs = gql`
     status: String
     features: [String!]
     position: PositionInput
-    images: [String!]
   }
 
   input PositionInput {
@@ -249,8 +259,6 @@ export const inputs = gql`
     notes: String
     specialRequests: String
     source: String
-    isPrivatization: Boolean
-    privatizationOptionId: ID
   }
 
   input CustomerInfoInput {

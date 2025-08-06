@@ -19,6 +19,9 @@ const GET_RESTAURANT_SETTINGS = gql`
         maxPartySize
         reservationWindow
         cancellationHours
+        slotFrequencyMinutes
+        maxReservationsPerSlot
+        totalCapacityOverride
       }
       businessHours {
         day
@@ -94,6 +97,7 @@ export default function RestaurantTablesPage() {
         setFormData({
             settings: data.restaurant.settings,
             tableCounts: data.restaurant.tableCounts,
+            businessHours: data.restaurant.businessHours,
         })
       }
     },
@@ -106,16 +110,20 @@ export default function RestaurantTablesPage() {
     if (!restaurantId) return
 
     const input = {
-      settings: {
-        currency: formData.settings.currency,
-        timezone: formData.settings.timezone,
-        taxRate: Number(formData.settings.taxRate),
-        serviceFee: Number(formData.settings.serviceFee),
-        maxPartySize: Number(formData.settings.maxPartySize),
-        reservationWindow: Number(formData.settings.reservationWindow),
-        cancellationHours: Number(formData.settings.cancellationHours),
+        name: data.restaurant.name,
+        settings: {
+            currency: formData.settings.currency,
+            timezone: formData.settings.timezone,
+            taxRate: Number(formData.settings.taxRate),
+            serviceFee: Number(formData.settings.serviceFee),
+            maxPartySize: Number(formData.settings.maxPartySize),
+            reservationWindow: Number(formData.settings.reservationWindow),
+            cancellationHours: Number(formData.settings.cancellationHours),
+            slotFrequencyMinutes: Number(formData.settings.slotFrequencyMinutes),
+            maxReservationsPerSlot: Number(formData.settings.maxReservationsPerSlot),
+            totalCapacityOverride: Number(formData.settings.totalCapacityOverride),
       },
-      businessHours: formData.settings.openingHours,
+      businessHours: formData.businessHours,
       tableCounts: {
         seats2: Number(formData.tableCounts.seats2),
         seats4: Number(formData.tableCounts.seats4),

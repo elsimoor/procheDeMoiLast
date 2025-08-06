@@ -13,7 +13,6 @@ interface ITable extends Document {
   status: 'available' | 'occupied' | 'reserved' | 'cleaning';
   features: string[];
   position: IPosition;
-  images: string[];
   isActive: boolean;
 }
 
@@ -46,7 +45,6 @@ const tableSchema = new Schema<ITable>({
     x: Number,
     y: Number
   },
-  images: [String],
   isActive: {
     type: Boolean,
     default: true
