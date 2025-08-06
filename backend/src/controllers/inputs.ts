@@ -249,6 +249,8 @@ export const inputs = gql`
     notes: String
     specialRequests: String
     source: String
+    isPrivatization: Boolean
+    privatizationOptionId: ID
   }
 
   input CustomerInfoInput {

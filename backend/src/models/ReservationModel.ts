@@ -1,15 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 interface ReservationDocument extends Document {
-  /** The owning client for this reservation */
   businessId: mongoose.Types.ObjectId;
-  /**
-   * Type of reservation.  Historically this field referenced the
-   * underlying model (hotel/restaurant/salon).  It now indicates the
-   * module enabled on the client: `hotel` for room bookings, `restaurant`
-   * for table bookings and `salon` for service bookings.  This field is
-   * maintained for backwards compatibility.
-   */
   businessType: 'hotel' | 'restaurant' | 'salon';
   customerId?: mongoose.Types.ObjectId;
   customerInfo: {
@@ -17,61 +9,63 @@ interface ReservationDocument extends Document {
     email: string;
     phone: string;
   };
+  date: Date;
+  time?: string;
+  partySize?: number;
+  duration?: number;
+  tableId?: mongoose.Types.ObjectId;
   roomId?: mongoose.Types.ObjectId;
+  serviceId?: mongoose.Types.ObjectId;
+  staffId?: mongoose.Types.ObjectId;
   checkIn?: Date;
   checkOut?: Date;
   guests?: number;
-  tableId?: mongoose.Types.ObjectId;
-  partySize?: number;
-  serviceId?: mongoose.Types.ObjectId;
-  staffId?: mongoose.Types.ObjectId;
-  date: Date;
-  time?: string;
-  duration?: number;
-  status: 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled' | 'no-show';
-  totalAmount?: number;
-  paymentStatus: 'pending' | 'paid' | 'refunded';
+  status: 'pending' | 'confirmed' | 'cancelled';
   notes?: string;
   specialRequests?: string;
+  totalAmount?: number;
+  paymentStatus: 'pending' | 'paid' | 'refunded';
+  source: 'online' | 'phone' | 'walk-in';
   reminderSent: boolean;
-  source: 'website' | 'phone' | 'walk-in' | 'admin';
+  isPrivatization: boolean;
+  privatizationOptionId?: mongoose.Types.ObjectId;
 }
 
 const reservationSchema = new Schema<ReservationDocument>({
   businessId: {
     type: Schema.Types.ObjectId,
-    // Reference the Client model rather than Hotel.  While the original
-    // implementation assumed a hotel reservation, the businessId now
-    // always points to a Client (tenant) document.  Mongoose population
-    // using this ref will therefore load Client records.
-    ref: 'Client',
+    required: true,
+    refPath: 'businessType'
   },
   businessType: {
     type: String,
-    enum: ['hotel', 'restaurant', 'salon'],
-    
+    required: true,
+    enum: ['Hotel', 'Restaurant', 'Salon']
   },
   customerId: {
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
   customerInfo: {
-    name: { type: String,  },
-    email: { type: String,  },
-    phone: { type: String,  }
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String }
+  },
+  date: {
+    type: Date,
+    required: true
+  },
+  time: String,
+  partySize: Number,
+  duration: Number,
+  tableId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Table'
   },
   roomId: {
     type: Schema.Types.ObjectId,
     ref: 'Room'
   },
-  checkIn: Date,
-  checkOut: Date,
-  guests: Number,
-  tableId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Table'
-  },
-  partySize: Number,
   serviceId: {
     type: Schema.Types.ObjectId,
     ref: 'Service'
@@ -80,31 +74,39 @@ const reservationSchema = new Schema<ReservationDocument>({
     type: Schema.Types.ObjectId,
     ref: 'Staff'
   },
-  date: { type: Date,  },
-  time: String,
-  duration: Number,
+  checkIn: Date,
+  checkOut: Date,
+  guests: Number,
   status: {
     type: String,
-    enum: ['pending', 'confirmed', 'in-progress', 'completed', 'cancelled', 'no-show'],
+    enum: ['pending', 'confirmed', 'cancelled'],
     default: 'pending'
   },
+  notes: String,
+  specialRequests: String,
   totalAmount: Number,
   paymentStatus: {
     type: String,
     enum: ['pending', 'paid', 'refunded'],
     default: 'pending'
   },
-  notes: String,
-  specialRequests: String,
+  source: {
+    type: String,
+    enum: ['online', 'phone', 'walk-in'],
+    default: 'online'
+  },
   reminderSent: {
     type: Boolean,
     default: false
   },
-  source: {
-    type: String,
-    enum: ['website', 'phone', 'walk-in', 'admin'],
-    default: 'website'
-  }
+  isPrivatization: {
+    type: Boolean,
+    default: false,
+  },
+  privatizationOptionId: {
+    type: Schema.Types.ObjectId,
+    ref: 'PrivatizationOption',
+  },
 }, {
   timestamps: true
 });
