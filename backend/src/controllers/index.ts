@@ -11,6 +11,7 @@ import { userResolvers, userTypeDefs } from "./User";
 
 // New client controller providing multi‑tenant support
 import { clientResolvers, clientTypeDefs } from "./Client";
+import { privatisationResolvers, privatisationTypeDef } from "./privatisation";
 
 
 
@@ -40,6 +41,7 @@ const resolvers = [
   staffResolvers,
   tableResolvers,
   clientResolvers,
+  privatisationResolvers,
 
 
 ];
@@ -55,6 +57,7 @@ const typeDefs = [
   staffTypeDef,
   tableTypeDefs,
   clientTypeDefs,
+  privatisationTypeDef,
   inputs,
   root,
 ];
