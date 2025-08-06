@@ -205,16 +205,19 @@ export const businessResolvers = {
       { input }
     ) => {
       const { restaurantId, ...reservationData } = input;
+      const restaurant = await RestaurantModel.findById(restaurantId);
+      if (!restaurant) {
+        throw new GraphQLError('Restaurant not found.');
+      }
       const reservation = new ReservationModel({
         ...reservationData,
-        businessId: restaurantId,
+        businessId: restaurant.clientId,
         businessType: "restaurant",
         partySize: input.personnes,
         time: input.heure,
-        status: "confirmed", // As per new flow, confirmation is the final step
+        status: "confirmed",
       });
       await reservation.save();
-      // Assuming the Reservation loader can resolve the fields
       return reservation;
     },
 
@@ -223,11 +226,13 @@ export const businessResolvers = {
       { input }
     ) => {
       const { restaurantId, ...privatisationData } = input;
-      // This is a simplified version. A real implementation would need to
-      // block the capacity for the given time slot.
+      const restaurant = await RestaurantModel.findById(restaurantId);
+      if (!restaurant) {
+        throw new GraphQLError('Restaurant not found.');
+      }
       const reservation = new ReservationModel({
         ...privatisationData,
-        businessId: restaurantId,
+        businessId: restaurant.clientId,
         businessType: "restaurant",
         partySize: input.personnes,
         time: input.heure,
