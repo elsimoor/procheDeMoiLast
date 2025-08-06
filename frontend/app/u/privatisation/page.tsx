@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { gql, useQuery } from "@apollo/client";
 import { toast } from "sonner";
 
@@ -24,16 +26,15 @@ const GET_PRIVATISATION_OPTIONS = gql`
   }
 `;
 
-export default function PrivatisationPage() {
+function PrivatisationContent() {
   const [type, setType] = useState<"restaurant" | "menu" | null>(null);
   const [selectedOptionId, setSelectedOptionId] = useState("");
   const [menu, setMenu] = useState("");
   const [espace, setEspace] = useState("Salle entière"); // Default as per requirements
 
   const router = useRouter();
-
-  // Replace with actual restaurant ID logic
-  const restaurantId = "66b3e6e58d389964b73b7553";
+  const searchParams = useSearchParams();
+  const restaurantId = searchParams.get('restaurantId');
 
   const { loading, error, data } = useQuery(GET_PRIVATISATION_OPTIONS, {
     variables: { restaurantId },
@@ -53,6 +54,7 @@ export default function PrivatisationPage() {
     if (!isFormValid) return;
 
     const params = new URLSearchParams({
+      restaurantId: restaurantId,
       typePrivatisation: selectedOption.nom,
       menuGroupe: menu,
       espace,
@@ -144,4 +146,12 @@ export default function PrivatisationPage() {
       </div>
     </div>
   );
+}
+
+export default function PrivatisationPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <PrivatisationContent />
+        </Suspense>
+    )
 }
