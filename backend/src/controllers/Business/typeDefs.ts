@@ -99,6 +99,51 @@ export const businessTypeDef = gql`
     maxPartySize: Int
     reservationWindow: Int
     cancellationHours: Int
+    horaires: [Horaire!]
+    capaciteTotale: Int
+    tables: Tables
+    frequenceCreneauxMinutes: Int
+    maxReservationsParCreneau: Int
+    capaciteTheorique: Int
+  }
+
+  type Horaire {
+    ouverture: String
+    fermeture: String
+  }
+
+  type Tables {
+    "2": Int
+    "4": Int
+    "6": Int
+    "8": Int
+  }
+
+  input RestaurantSettingsInput {
+    currency: String
+    timezone: String
+    taxRate: Float
+    serviceFee: Float
+    maxPartySize: Int
+    reservationWindow: Int
+    cancellationHours: Int
+    horaires: [HoraireInput!]
+    capaciteTotale: Int
+    tables: TablesInput
+    frequenceCreneauxMinutes: Int
+    maxReservationsParCreneau: Int
+  }
+
+  input HoraireInput {
+    ouverture: String
+    fermeture: String
+  }
+
+  input TablesInput {
+    "2": Int
+    "4": Int
+    "6": Int
+    "8": Int
   }
 
   type SalonSettings {
@@ -141,5 +186,36 @@ export const businessTypeDef = gql`
   type Rating {
     average: Float!
     count: Int!
+  }
+
+  extend type Mutation {
+    updateRestaurant(id: ID!, input: UpdateRestaurantInput!): Restaurant
+  }
+
+  input UpdateRestaurantInput {
+    name: String
+    description: String
+    address: AddressInput
+    contact: ContactInput
+    settings: RestaurantSettingsInput
+    cuisine: [String!]
+    priceRange: String
+    features: [String!]
+    images: [String!]
+    isActive: Boolean
+  }
+
+  input AddressInput {
+    street: String
+    city: String
+    state: String
+    zipCode: String
+    country: String
+  }
+
+  input ContactInput {
+    phone: String
+    email: String
+    website: String
   }
 `;

@@ -36,6 +36,12 @@ interface RestaurantDocument extends Document {
     maxPartySize: number;
     reservationWindow: number;
     cancellationHours: number;
+    horaires: { ouverture: string; fermeture: string }[];
+    capaciteTotale: number;
+    tables: { '2': number; '4': number; '6': number; '8': number };
+    frequenceCreneauxMinutes: number;
+    maxReservationsParCreneau: number;
+    capaciteTheorique: number;
   };
   businessHours: BusinessHours[];
   cuisine: string[];
@@ -76,7 +82,21 @@ const restaurantSchema = new Schema<RestaurantDocument>({
     serviceFee: { type: Number, default: 0 },
     maxPartySize: { type: Number, default: 10 },
     reservationWindow: { type: Number, default: 60 },
-    cancellationHours: { type: Number, default: 2 }
+    cancellationHours: { type: Number, default: 2 },
+    horaires: [{
+      ouverture: String,
+      fermeture: String
+    }],
+    capaciteTotale: { type: Number, default: 0 },
+    tables: {
+      '2': { type: Number, default: 0 },
+      '4': { type: Number, default: 0 },
+      '6': { type: Number, default: 0 },
+      '8': { type: Number, default: 0 }
+    },
+    frequenceCreneauxMinutes: { type: Number, default: 30 },
+    maxReservationsParCreneau: { type: Number, default: 10 },
+    capaciteTheorique: { type: Number, default: 0 }
   },
   businessHours: [{
     day: {
