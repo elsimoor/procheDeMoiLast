@@ -73,8 +73,9 @@ const GET_USERS = gql`
       lastName
       email
       role
-      businessType
-      businessId
+      restaurantId
+      hotelId
+      salonId
     }
   }
 `
@@ -83,8 +84,9 @@ const UPDATE_USER = gql`
   mutation UpdateUserAdmin($id: ID!, $input: UserUpdateInput!) {
     updateUser(id: $id, input: $input) {
       id
-      businessId
-      businessType
+      restaurantId
+      hotelId
+      salonId
     }
   }
 `
@@ -253,7 +255,7 @@ export default function AdminSalonsPage() {
       await updateUser({
         variables: {
           id: selectedUserId,
-          input: { businessType: "salon", businessId: selectedSalonId },
+          input: { salonId: selectedSalonId },
         },
       })
       alert("User assigned to salon successfully")
@@ -329,7 +331,7 @@ export default function AdminSalonsPage() {
                   {usersData?.users?.map((u: any) => (
                     <option key={u.id} value={u.id}>
                       {u.email} {u.firstName || u.lastName ? `(${u.firstName ?? ''} ${u.lastName ?? ''})` : ''}
-                      {u.businessType === 'salon' && u.businessId ? ' - assigned' : ''}
+                      {u.salonId ? ' - assigned' : ''}
                     </option>
                   ))}
                 </select>
