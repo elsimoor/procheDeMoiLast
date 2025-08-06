@@ -53,23 +53,28 @@ const formSchema = z.object({
   ).min(1, "Au moins une plage horaire est requise."),
   capaciteTotale: z.coerce.number().positive("La capacité totale doit être un nombre positif."),
   tables: z.object({
-    size2: z.coerce.number().min(0),
-    size4: z.coerce.number().min(0),
-    size6: z.coerce.number().min(0),
-    size8: z.coerce.number().min(0),
+    size2: z.coerce.number().min(0, "Doit être un nombre positif."),
+    size4: z.coerce.number().min(0, "Doit être un nombre positif."),
+    size6: z.coerce.number().min(0, "Doit être un nombre positif."),
+    size8: z.coerce.number().min(0, "Doit être un nombre positif."),
   }),
   frequenceCreneauxMinutes: z.coerce.number().positive("La fréquence doit être un nombre positif."),
   maxReservationsParCreneau: z.coerce.number().positive("La limite doit être un nombre positif."),
-}).refine(data => {
-    for (const horaire of data.horaires) {
-        if (horaire.ouverture && horaire.fermeture && horaire.ouverture >= horaire.fermeture) {
-            return false;
-        }
-    }
-    return true;
+})
+.refine(data => {
+    // Validate that for any schedule, opening time is before closing time.
+    return data.horaires.every(h => !h.ouverture || !h.fermeture || h.ouverture < h.fermeture);
 }, {
-    message: "L'heure d'ouverture doit être antérieure à l'heure de fermeture.",
+    message: "L'heure d'ouverture doit être antérieure à l'heure de fermeture pour chaque plage.",
     path: ["horaires"],
+})
+.refine(data => data.frequenceCreneauxMinutes > 0 && data.frequenceCreneauxMinutes % 5 === 0, {
+    message: "La fréquence des créneaux doit être un multiple de 5 (ex: 15, 30, 60).",
+    path: ["frequenceCreneauxMinutes"],
+})
+.refine(data => data.maxReservationsParCreneau <= data.capaciteTotale, {
+    message: "La limite par créneau ne peut pas dépasser la capacité totale.",
+    path: ["maxReservationsParCreneau"],
 });
 
 export default function TablesDisponibilitesPage() {
@@ -351,7 +356,7 @@ export default function TablesDisponibilitesPage() {
           </Card>
 
           <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={updateLoading} className="bg-blue-500 hover:bg-blue-600 text-white rounded-full px-6 py-2">
+            <Button type="submit" disabled={updateLoading} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-200 ease-in-out">
               {updateLoading ? 'Enregistrement...' : 'Enregistrer les modifications'}
             </Button>
           </div>

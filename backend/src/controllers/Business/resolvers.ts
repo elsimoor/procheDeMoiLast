@@ -1,5 +1,5 @@
 // business.resolvers.ts
-// Authentication checks removed; import not needed.
+import { GraphQLError } from 'graphql';
 import HotelModel from '../../models/HotelModel';
 import RestaurantModel from '../../models/RestaurantModel';
 import SalonModel from '../../models/SalonModel';
@@ -102,10 +102,59 @@ export const businessResolvers = {
       { id, input },
       _ctx: Context
     ) => {
-      if (input.settings && input.settings.tables) {
-        const tables = input.settings.tables;
-        const capaciteTheorique = (tables.size2 || 0) * 2 + (tables.size4 || 0) * 4 + (tables.size6 || 0) * 6 + (tables.size8 || 0) * 8;
-        input.settings['capaciteTheorique'] = capaciteTheorique;
+      if (input.settings) {
+        const {
+          horaires,
+          frequenceCreneauxMinutes,
+          maxReservationsParCreneau,
+          capaciteTotale,
+          tables
+        } = input.settings;
+
+        // Validate horaires: ouverture < fermeture
+        if (horaires) {
+          for (const horaire of horaires) {
+            if (horaire.ouverture && horaire.fermeture && horaire.ouverture >= horaire.fermeture) {
+              throw new GraphQLError("L'heure d'ouverture doit être antérieure à l'heure de fermeture.", {
+                extensions: { code: 'BAD_USER_INPUT', field: 'horaires' },
+              });
+            }
+          }
+        }
+
+        // Validate frequenceCreneauxMinutes: positive and divisible by 5
+        if (frequenceCreneauxMinutes) {
+            if (frequenceCreneauxMinutes <= 0 || frequenceCreneauxMinutes % 5 !== 0) {
+                throw new GraphQLError("La fréquence des créneaux doit être un nombre positif divisible par 5.", {
+                    extensions: { code: 'BAD_USER_INPUT', field: 'frequenceCreneauxMinutes' },
+                });
+            }
+        }
+
+        // Calculate capaciteTheorique
+        let capaciteTheorique = 0;
+        if (tables) {
+          capaciteTheorique =
+            (tables.size2 || 0) * 2 +
+            (tables.size4 || 0) * 4 +
+            (tables.size6 || 0) * 6 +
+            (tables.size8 || 0) * 8;
+          input.settings.capaciteTheorique = capaciteTheorique;
+        }
+
+        // Validate maxReservationsParCreneau against capaciteTotale and capaciteTheorique
+        if (maxReservationsParCreneau) {
+          if (capaciteTotale !== undefined && maxReservationsParCreneau > capaciteTotale) {
+            throw new GraphQLError("La limite par créneau ne peut pas dépasser la capacité totale.", {
+              extensions: { code: 'BAD_USER_INPUT', field: 'maxReservationsParCreneau' },
+            });
+          }
+          if (tables && maxReservationsParCreneau > capaciteTheorique) {
+            throw new GraphQLError("La limite par créneau ne peut pas dépasser la capacité théorique.", {
+              extensions: { code: 'BAD_USER_INPUT', field: 'maxReservationsParCreneau' },
+            });
+          }
+        }
       }
       return RestaurantModel.findByIdAndUpdate(id, input, { new: true });
     },
