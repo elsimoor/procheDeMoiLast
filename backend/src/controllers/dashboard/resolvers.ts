@@ -15,7 +15,7 @@ export const dashboardResolvers = {
       const endDate = to ? moment(to) : moment().endOf('month');
 
       const reservations = await ReservationModel.find({
-        businessId: restaurantId,
+        businessId: restaurant.clientId,
         businessType: 'restaurant',
         date: { $gte: startDate.toDate(), $lte: endDate.toDate() },
       });
@@ -48,11 +48,15 @@ export const dashboardResolvers = {
     },
 
     dashboardCalendar: async (_, { restaurantId, month }) => {
+      const restaurant = await RestaurantModel.findById(restaurantId);
+      if (!restaurant) {
+        throw new GraphQLError('Restaurant not found.');
+      }
       const start = moment.utc(month).startOf('month').toDate();
       const end = moment.utc(month).endOf('month').toDate();
 
       const reservations = await ReservationModel.find({
-        businessId: restaurantId,
+        businessId: restaurant.clientId,
         businessType: 'restaurant',
         date: { $gte: start, $lte: end },
       }).select('date');
@@ -70,11 +74,15 @@ export const dashboardResolvers = {
     },
 
     reservationsByDate: async (_, { restaurantId, date }) => {
+      const restaurant = await RestaurantModel.findById(restaurantId);
+      if (!restaurant) {
+        throw new GraphQLError('Restaurant not found.');
+      }
       const targetDate = moment.utc(date).startOf('day').toDate();
       const nextDay = moment.utc(targetDate).add(1, 'days').toDate();
 
       const reservations = await ReservationModel.find({
-        businessId: restaurantId,
+        businessId: restaurant.clientId,
         businessType: 'restaurant',
         date: { $gte: targetDate, $lt: nextDay },
       }).populate('businessId');
@@ -118,7 +126,7 @@ export const dashboardResolvers = {
       const endOfDay = moment.utc(date).endOf('day').toDate();
 
       const reservations = await ReservationModel.find({
-        businessId: restaurantId,
+        businessId: restaurant.clientId,
         businessType: 'restaurant',
         date: { $gte: startOfDay, $lt: endOfDay },
         status: { $in: ['confirmed', 'pending'] } // Consider pending as well
