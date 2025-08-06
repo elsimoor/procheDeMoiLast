@@ -15,8 +15,9 @@ interface Availability {
 
 interface StaffMember {
   id: string
-  businessId: string
-  businessType: string
+  restaurantId?: string
+  hotelId?: string
+  salonId?: string
   userId?: string | null
   name: string
   role: string
@@ -42,8 +43,7 @@ export default function RestaurantStaff() {
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null)
 
   // Session state to determine which business (restaurant) is active
-  const [businessId, setBusinessId] = useState<string | null>(null)
-  const [businessType, setBusinessType] = useState<string | null>(null)
+  const [restaurantId, setRestaurantId] = useState<string | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
   const [sessionError, setSessionError] = useState<string | null>(null)
 
@@ -55,8 +55,7 @@ export default function RestaurantStaff() {
           throw new Error("Failed to fetch session")
         }
         const sess = await res.json()
-        setBusinessId(sess.businessId)
-        setBusinessType(sess.businessType)
+        setRestaurantId(sess.restaurantId)
       } catch (error) {
         setSessionError((error as Error).message)
       } finally {
@@ -68,11 +67,10 @@ export default function RestaurantStaff() {
 
   // GraphQL operations
   const GET_STAFF = gql`
-    query GetStaff($businessId: ID!, $businessType: String!) {
-      staff(businessId: $businessId, businessType: $businessType) {
+    query GetStaff($restaurantId: ID!) {
+      staff(restaurantId: $restaurantId) {
         id
-        businessId
-        businessType
+        restaurantId
         name
         role
         email
@@ -153,8 +151,8 @@ export default function RestaurantStaff() {
     error: staffError,
     refetch: refetchStaff,
   } = useQuery(GET_STAFF, {
-    variables: { businessId, businessType },
-    skip: !businessId || !businessType,
+    variables: { restaurantId },
+    skip: !restaurantId,
   })
 
   const [createStaff] = useMutation(CREATE_STAFF, {
@@ -236,15 +234,14 @@ export default function RestaurantStaff() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!businessId || !businessType) return
+    if (!restaurantId) return
     try {
       if (editingStaff) {
         await updateStaff({
           variables: {
             id: editingStaff.id,
             input: {
-              businessId,
-              businessType,
+              restaurantId,
               name: formData.name,
               role: formData.role,
               email: formData.email,
@@ -264,8 +261,7 @@ export default function RestaurantStaff() {
         await createStaff({
           variables: {
             input: {
-              businessId,
-              businessType,
+              restaurantId,
               name: formData.name,
               role: formData.role,
               email: formData.email,

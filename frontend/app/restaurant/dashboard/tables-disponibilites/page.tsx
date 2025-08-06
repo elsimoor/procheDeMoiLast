@@ -104,8 +104,8 @@ export default function TablesDisponibilitesPage() {
           return;
         }
         const data = await res.json();
-        if (data.businessType && data.businessType.toLowerCase() === "restaurant" && data.businessId) {
-          setRestaurantId(data.businessId);
+        if (data.restaurantId) {
+          setRestaurantId(data.restaurantId);
         }
       } catch (err) {
         console.error(err);

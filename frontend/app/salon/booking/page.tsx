@@ -48,8 +48,8 @@ export default function SalonBookingPage() {
   // GraphQL queries to retrieve available services and staff for the
   // current salon.  These lists populate the form dropdowns.
   const GET_SERVICES = gql`
-    query GetServices($businessId: ID!, $businessType: String!) {
-      services(businessId: $businessId, businessType: $businessType) {
+    query GetServices($salonId: ID!) {
+      services(salonId: $salonId) {
         id
         name
         description
@@ -68,8 +68,8 @@ export default function SalonBookingPage() {
     }
   `
   const GET_STAFF = gql`
-    query GetStaff($businessId: ID!, $businessType: String!) {
-      staff(businessId: $businessId, businessType: $businessType) {
+    query GetStaff($salonId: ID!) {
+      staff(salonId: $salonId) {
         id
         name
         role
@@ -80,8 +80,8 @@ export default function SalonBookingPage() {
   // Fetch reservations to determine which time slots are unavailable on a given date.  We request only
   // id, date and time to minimise payload.  This will be used to mark time slots as reserved in the UI.
   const GET_RESERVATIONS = gql`
-    query GetReservations($businessId: ID!, $businessType: String!) {
-      reservations(businessId: $businessId, businessType: $businessType) {
+    query GetReservations($salonId: ID!) {
+      reservations(salonId: $salonId) {
         id
         date
         time
@@ -99,15 +99,15 @@ export default function SalonBookingPage() {
   `
 
   const { data: servicesData } = useQuery(GET_SERVICES, {
-    variables: { businessId: salonId, businessType: "salon" },
+    variables: { salonId: salonId },
     skip: !salonId,
   });
   const { data: staffData } = useQuery(GET_STAFF, {
-    variables: { businessId: salonId, businessType: "salon" },
+    variables: { salonId: salonId },
     skip: !salonId,
   });
   const { data: reservationsData } = useQuery(GET_RESERVATIONS, {
-    variables: { businessId: salonId, businessType: "salon" },
+    variables: { salonId: salonId },
     skip: !salonId,
   });
   const [createReservation] = useMutation(CREATE_RESERVATION)
@@ -167,8 +167,7 @@ export default function SalonBookingPage() {
       const optionNotes = selectedOptions.length > 0 ? `Options: ${selectedOptions.join(", ")}` : ""
       const combinedNotes = [bookingData.notes, optionNotes].filter(Boolean).join(" | ") || undefined
       const input: any = {
-        businessId: salonId,
-        businessType: "salon",
+        salonId: salonId,
         customerInfo: {
           name: bookingData.name,
           email: bookingData.email,

@@ -18,6 +18,7 @@ const GET_HOTEL = gql`
   query GetHotel($id: ID!) {
     hotel(id: $id) {
       id
+      clientId
       services {
         name
         description
@@ -110,8 +111,8 @@ export default function HotelOptions() {
         const data = await res.json()
         // Session's businessType is stored in lower case; perform a
         // case‑insensitive comparison to detect hotel accounts.
-        if (data.businessType && data.businessType.toLowerCase() === "hotel" && data.businessId) {
-          setHotelId(data.businessId);
+        if (data.hotelId) {
+          setHotelId(data.hotelId);
         } else {
           setSessionError("You are not associated with a hotel business.");
         }
@@ -227,6 +228,7 @@ export default function HotelOptions() {
           variables: {
             id: hotelId,
             input: {
+              clientId: hotelData.hotel.clientId,
               services: cleanTypename(updatedServices.map(({ id, icon, ...rest }) => rest)),
               amenities: cleanTypename(updatedAmenities.map(({ id, ...rest }) => rest)),
               policies: cleanTypename(updatedPolicies.map(({ id, ...rest }) => rest)),

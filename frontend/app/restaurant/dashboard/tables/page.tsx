@@ -74,8 +74,8 @@ export default function RestaurantTablesPage() {
           return
         }
         const data = await res.json()
-        if (data.businessType && data.businessType.toLowerCase() === "restaurant" && data.businessId) {
-          setRestaurantId(data.businessId)
+        if (data.restaurantId) {
+          setRestaurantId(data.restaurantId)
         } else {
           setSessionError("You are not associated with a restaurant business.")
         }
